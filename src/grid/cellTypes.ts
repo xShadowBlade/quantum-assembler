@@ -4,8 +4,12 @@
 import { Decimal, roundingBase } from "emath.js";
 import type { Grid, ItemInit, DecimalSource } from "emath.js";
 import { Game } from "../game";
-import type { QACell, QAGridCell } from "./quantumAssembler";
+import type { QACell } from "./qaCell";
+import type { QAGridCell } from "./quantumAssembler";
 
+/**
+ * The static spawner of a cell in the quantum assembler grid
+ */
 interface QACellStaticSpawner {
     /**
      * The type of the cell
@@ -175,7 +179,7 @@ const cellTypes = [
         },
     },
     {
-        type: "higgs boson",
+        type: "higgsBoson",
         character: "H",
         special: true,
         upgrade: {
@@ -185,7 +189,7 @@ const cellTypes = [
         },
     },
     {
-        type: "z boson",
+        type: "zBoson",
         character: "Z",
         special: true,
         upgrade: {
@@ -195,7 +199,7 @@ const cellTypes = [
         },
     },
     {
-        type: "w boson",
+        type: "wBoson",
         character: "W",
         special: true,
         upgrade: {

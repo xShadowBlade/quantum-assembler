@@ -7,6 +7,10 @@ import { Game } from "../game";
 import { cellTypes } from "./cellTypes";
 import type { QACellType } from "./cellTypes";
 
+/**
+ * The energy items.
+ * For each cell type, there is an item so that the player can buy it for different tiers.
+ */
 const energyItems = cellTypes.map((cell): ItemInit => ({
     ...cell.upgrade,
     id: cell.type,
@@ -16,8 +20,6 @@ const energyItems = cellTypes.map((cell): ItemInit => ({
  * The energy currency
  */
 const energy = Game.addCurrency("energy", [], energyItems);
-
-// energy.getItem("void");
 
 // debug
 if (Game.config.mode === "development") {

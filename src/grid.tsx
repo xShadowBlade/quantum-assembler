@@ -14,7 +14,7 @@ import GridComponent from "@mui/material/Grid";
 // import FormControlLabel from "@mui/material/FormControlLabel";
 import { Grid, GridCell, GridCellCollection } from "emath.js";
 
-import { quantumAssemblerGrid } from "./grid/quantumAssembler";
+import { quantumAssembler } from "./grid/quantumAssembler";
 import type { QAGridCell } from "./grid/quantumAssembler";
 
 /**
@@ -22,13 +22,16 @@ import type { QAGridCell } from "./grid/quantumAssembler";
  */
 interface GridCellComponentProps {
     cell: GridCell<QAGridCell>;
-    render: number;
-    setRender: React.Dispatch<React.SetStateAction<number>>;
+    rerender: () => void;
+    // render: number;
+    // setRender: React.Dispatch<React.SetStateAction<number>>;
     // selected: GridCell<GridCellProps> | null;
     // setSelected: (cell: GridCell<QAGridCell>) => void;
 }
 
-const GridCellComponent: React.FC<GridCellComponentProps> = ({ cell, render, setRender }) => {
+const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
+    const { cell, rerender } = props;
+
     const [color, setColor] = useState<ButtonOwnProps["color"]>("info");
 
     return (
@@ -38,7 +41,9 @@ const GridCellComponent: React.FC<GridCellComponentProps> = ({ cell, render, set
             onClick={() => {
                 // cell.properties.selected = !cell.properties.selected;
                 // setSelected(cell);
-                setRender(render + 1);
+
+                // Reload the grid
+                rerender();
             }}
             style={{
                 margin: "10px",
@@ -51,12 +56,18 @@ const GridCellComponent: React.FC<GridCellComponentProps> = ({ cell, render, set
     );
 };
 
+interface GridCellProps {
+    // render: number;
+    // setRender: React.Dispatch<React.SetStateAction<number>>;
+    rerender: () => void;
+}
+
 /**
  * @returns The grid component.
+ * @param props - The properties of the grid component.
  */
-const GridVisuals: React.FC = () => {
-    // Rerender the grid
-    const [render, setRender] = useState(0);
+const GridVisuals: React.FC<GridCellProps> = (props) => {
+    const { rerender } = props;
 
     // The selected cell
     const [selected, setSelected] = useState<GridCell<QAGridCell> | null>(null);
@@ -66,14 +77,13 @@ const GridVisuals: React.FC = () => {
         {/* Grid component */}
         <GridComponent container spacing={0}>
             {/* For each cell, map a component */}
-            {quantumAssemblerGrid.cells.map((row, rowIndex) => (
+            {quantumAssembler.grid.cells.map((row, rowIndex) => (
                 <GridComponent item key={rowIndex} xs={12}>
                     {row.map((cell, cellIndex) => (
                         <GridCellComponent
                             key={cellIndex}
                             cell={cell}
-                            render={render}
-                            setRender={setRender}
+                            rerender={rerender}
                         />
                     ))}
                 </GridComponent>
