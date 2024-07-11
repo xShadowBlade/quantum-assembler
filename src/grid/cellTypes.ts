@@ -1,7 +1,7 @@
 /**
  * @file Declares the cell types for the grid.
  */
-import { Decimal } from "emath.js";
+import { Decimal, roundingBase } from "emath.js";
 import type { Grid, ItemInit, DecimalSource } from "emath.js";
 import { Game } from "../game";
 import type { QACell, QAGridCell } from "./quantumAssembler";
@@ -21,14 +21,15 @@ interface QACellStaticSpawner {
     /**
      * The upgrade of the cell
      */
-    upgrade: Readonly<Omit<ItemInit, "id">>;
+    upgrade: Readonly<Omit<ItemInit, "id" | "effect">>;
 
     /**
      * The effect of the cell
+     * @param tier - The tier of the cell
      * @param cell - The cell
      * @param grid - The grid
      */
-    effect?: (cell: QACell, grid: Grid<QAGridCell>) => void;
+    effect?: (tier: Decimal, cell: QACell, grid: Grid<QAGridCell>) => void;
 
     /**
      * Whether the cell is special (only one can be placed in the grid)
@@ -60,10 +61,25 @@ const cellTypes = [
         type: "charm",
         character: "C",
         upgrade: {
-            name: "Charm Quark: starts assembler.",
-            description: "Generates charm.",
+            name: "Charm Quark",
+            description: "Charm Quark: generates charm.",
             cost: (tier): Decimal => tier.pow(tier.plus(2.5)).round(),
-            // effect:
+            // cost: (tier): Decimal => Decimal.pow(3, tier.add(tier.div(5).pow(1.3)).pow(1.4)).round(),
+            // cost: (tier): Decimal => tier.mul(2).add(Decimal.pow(2, tier)).pow(tier).round(),
+        },
+        effect (tier, cell): void {
+            // TODO: Better formula
+            const charmGenerationAmount = tier.pow(tier.div(1.5)).round();
+
+            // debug
+            console.log("charmGenerationAmount", charmGenerationAmount.format());
+
+            cell.generation.boost.setBoost({
+                id: `charm-${cell.x}.${cell.y}`,
+                value: () => charmGenerationAmount,
+                // Order 0 is applied first
+                order: 0,
+            });
         },
     },
     {
@@ -74,6 +90,35 @@ const cellTypes = [
             description: "Up Quark: increases value by (TODO) and instability by (TODO).",
             cost: (tier): Decimal => tier.pow(tier.plus(4).mul(1.25)).add(4).round(),
         },
+        effect (tier, cell): void {
+            // TODO: Better formula
+            const valueMultiplier = tier.pow(tier.div(2)).add(1).round();
+            const instabilityMultiplier = tier.pow(tier.div(2.5)).add(1).round();
+
+            // debug
+            console.log("up valueMultiplier", valueMultiplier.format());
+
+            // For each cell that this cell is pointing to, set the boost
+            cell.getFacingDirection().forEach((cellToSetBoost) => {
+                console.log("cellToSetBoost", cellToSetBoost);
+
+                // Set the value boost
+                cellToSetBoost.generation.boost.setBoost({
+                    id: `up-${cell.x}.${cell.y}`,
+                    value: (input): Decimal => input.mul(valueMultiplier),
+                    // Order 3 for multiplier
+                    order: 3,
+                });
+
+                // Set the instability boost
+                cellToSetBoost.instability.boost.setBoost({
+                    id: `up-${cell.x}.${cell.y}`,
+                    value: (input): Decimal => input.mul(instabilityMultiplier),
+                    // Order 3 for multiplier
+                    order: 3,
+                });
+            });
+        },
     },
     {
         type: "down",
@@ -83,13 +128,28 @@ const cellTypes = [
             description: "Down Quark: decreases instability by (TODO).",
             cost: (tier): Decimal => tier.pow(tier.plus(3.5).mul(1.25)).add(4).round(),
         },
+        effect (tier, cell): void {
+            // TODO: Better formula
+            const instabilityDivisor = tier.pow(tier.div(2.5)).add(1).round();
+
+            // For each cell that this cell is pointing to, set the boost
+            cell.getFacingDirection().forEach((cellToSetBoost) => {
+                // Set the instability boost
+                cellToSetBoost.instability.boost.setBoost({
+                    id: `down-${cell.x}.${cell.y}`,
+                    value: (input): Decimal => input.div(instabilityDivisor),
+                    // Order 3 for multiplier
+                    order: 3,
+                });
+            });
+        },
     },
     {
         type: "strange",
         character: "S",
         upgrade: {
             name: "Strange Quark",
-            description: "Strange Quark: ends the assembler.",
+            description: "Strange Quark: ends the assembler. (currently does nothing)",
             cost: (tier): Decimal => tier.pow(tier.plus(3)).add(4).round(),
         },
     },
@@ -175,7 +235,7 @@ type QACellType = typeof cellTypes[number]["type"];
 if (Game.config.mode === "development") {
     Object.assign(window, {
         cellTypes,
-        tableCells: () => {
+        tableCells: (startCollapsed = true, exclude: QACellType[] = ["void", "singularity", "gluon"]) => {
             // Log table of cell types cost
             const tiersToTable: Decimal[] = ([
                 1,
@@ -224,18 +284,58 @@ if (Game.config.mode === "development") {
 
             // For each cell type, table the cost of each tier (seperate table for each cell type)
             cellTypes.forEach((cell) => {
-                console.table(tiersToTable.map(tier => ({
-                    type: cell.type,
-                    tier: tier.format(),
-                    cost: cell.upgrade.cost(tier).format(),
+                // Skip excluded cell types
+                if (exclude.includes(cell.type)) {
+                    return;
+                }
 
-                    // How much the cost increases from the previous tier (first derivative)
-                    "multiplier": cell.upgrade.cost(tier).div(cell.upgrade.cost(tier.sub(1))).format(),
+                // How much the cost increases from the previous tier (first derivative)
+                const getMultiplier = (tier: Decimal): Decimal => cell.upgrade.cost(tier).div(cell.upgrade.cost(tier.sub(1)));
 
-                    // How much the multiplier increases from the previous tier (second derivative)
-                    "multiplier ^2": cell.upgrade.cost(tier).div(cell.upgrade.cost(tier.sub(1)))
-                        .div(cell.upgrade.cost(tier.sub(1)).div(cell.upgrade.cost(tier.sub(2)))).format(),
-                })));
+                // How much the multiplier increases from the previous tier (second derivative)
+                const getMultiplier2 = (tier: Decimal): Decimal => getMultiplier(tier).div(getMultiplier(tier.sub(1)));
+
+                // How much the multiplier ^2 increases from the previous tier (third derivative)
+                // const getMultiplier3 = (tier: Decimal): Decimal => getMultiplier2(tier).div(getMultiplier2(tier.sub(1)));
+
+                // console.groupCollapsed(cell.type);
+
+                if (startCollapsed) {
+                    console.groupCollapsed(cell.type);
+                } else {
+                    console.group(cell.type);
+                }
+
+                const entries = ((): Record<string, Record<string, string>> => {
+                    const output: Record<string, Record<string, string>> = {};
+
+                    tiersToTable.forEach(tier => {
+                        output[tier.toNumber()] = {
+                            cost: cell.upgrade.cost(tier).format(),
+
+                            multiplier: Decimal.formats.formatMult(getMultiplier(tier)),
+                            "multiplier ^2": Decimal.formats.formatMult(getMultiplier2(tier)),
+                            // "multiplier ^3": getMultiplier3(tier).format(),
+                        };
+                    });
+
+                    return output;
+                })();
+
+                console.table(entries);
+
+                // const entries = tiersToTable.map(tier => ({
+                //     tier: tier.format(),
+                //     cost: cell.upgrade.cost(tier).format(),
+
+                //     multiplier: Decimal.formats.formatMult(getMultiplier(tier)),
+                //     "multiplier ^2": Decimal.formats.formatMult(getMultiplier2(tier)),
+                //     // "multiplier ^3": getMultiplier3(tier).format(),
+                // }));
+
+                // console.table(entries);
+
+                console.groupEnd();
             });
         },
     });

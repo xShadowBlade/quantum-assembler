@@ -66,7 +66,7 @@ const GridVisuals: React.FC = () => {
         {/* Grid component */}
         <GridComponent container spacing={0}>
             {/* For each cell, map a component */}
-            {quantumAssemblerGrid.value.cells.map((row, rowIndex) => (
+            {quantumAssemblerGrid.cells.map((row, rowIndex) => (
                 <GridComponent item key={rowIndex} xs={12}>
                     {row.map((cell, cellIndex) => (
                         <GridCellComponent
