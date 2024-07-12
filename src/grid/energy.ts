@@ -21,9 +21,31 @@ const energyItems = cellTypes.map((cell): ItemInit => ({
  */
 const energy = Game.addCurrency("energy", [], energyItems);
 
+const instability = Game.addCurrency("instability");
+
+// Set the initial energy boost to 0
+
+energy.boost.setBoost({
+    id: "initial",
+    value: () => Decimal.dZero,
+    order: 0,
+});
+
+energy.boost.setBoost({
+    id: "instability",
+    value: () => Decimal.dZero,
+    order: 0,
+});
+
+// Gain energy every second
+Game.eventManager.setEvent("energyGain", "interval", 0, (dt) => {
+    energy.gain(dt);
+    instability.gain(dt);
+});
+
 // debug
 if (Game.config.mode === "development") {
     Object.assign(window, { energy });
 }
 
-export { energy };
+export { energy, instability };

@@ -8,12 +8,19 @@ import type { GridDirectionCell } from "emath.js";
 // import { setCell } from "./grid/qaCell";
 import type { QACellType } from "./grid/cellTypes";
 import { energy } from "./grid/energy";
+import type { ShopSelectedCell } from "./app";
 
 /**
  * The props of the cell shop component
  */
 interface CellShopProps {
     rerender: () => void;
+
+    shopSelectedCell: ShopSelectedCell;
+    setShopSelectedCell: React.Dispatch<React.SetStateAction<ShopSelectedCell>>;
+
+    selectedCoords: [number, number];
+    setSelectedCoords: React.Dispatch<React.SetStateAction<[number, number]>>;
 }
 
 /**
@@ -22,20 +29,6 @@ interface CellShopProps {
  */
 const CellShop: React.FC<CellShopProps> = (props) => {
     const { rerender } = props;
-
-    // The selected cell to buy
-    const [selectedCell, setSelectedCell] = useState<{
-        type: QACellType;
-        tier: Decimal;
-        direction: GridDirectionCell;
-    }>({
-        type: "void",
-        tier: new Decimal(0),
-        direction: "up",
-    });
-
-    // The coordinates of the selected cell (x, y)
-    const [selectCoords, setSelectCoords] = useState<[number, number]>([0, 0]);
 
     return (
         <div>

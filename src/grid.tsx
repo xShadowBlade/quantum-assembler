@@ -28,13 +28,14 @@ interface GridCellComponentProps {
     theme: Theme;
 }
 
-const GridCellComponent: React.FC<{ props: GridCellComponentProps }> = ({ props }) => {
+const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
     const { cell, setSelectedCoords, theme } = props;
 
     const [color, setColor] = useState<ButtonOwnProps["color"]>(createCellThemeKey("void"));
 
     const getColor = (shade?: false): CellColorOverrideKey => createCellThemeKey(cell.properties.cell.cellType.type);
 
+    // TODO: Fix this
     const getBorderColor = (): string => {
         const borderColor = theme.palette[getColor()];
 
@@ -44,7 +45,7 @@ const GridCellComponent: React.FC<{ props: GridCellComponentProps }> = ({ props 
         // return isSelected ? borderColor.dark : borderColor.main;
 
         if (isSelected) {
-            console.log("Selected", cell.x, cell.y, borderColor.dark, { borderColor });
+            console.log("Selected", cell.x, cell.y, props.selectedCoords, borderColor.dark, { borderColor });
             return borderColor.dark;
             // return "primary";
         } else {
@@ -55,13 +56,13 @@ const GridCellComponent: React.FC<{ props: GridCellComponentProps }> = ({ props 
 
     // TODO: Better way to set the style
     const [style, setStyle] = useState<React.CSSProperties>({
-        borderRadius: 0,
-        border: 5,
+        // borderRadius: 0,
+        // border: 5,
         // borderColor: getBorderColor(),
-        get borderColor () {
-            // console.log("Getting border color", cell.x, cell.y);
-            return getBorderColor();
-        },
+        // get borderColor () {
+        //     // console.log("Getting border color", cell.x, cell.y);
+        //     return getBorderColor();
+        // },
     });
 
     // On render, set the color
@@ -142,15 +143,16 @@ const GridVisuals: React.FC<GridCellProps> = (props) => {
                     {row.map((cell, cellIndex) => (
                         <GridCellComponent
                             key={cellIndex}
-                            // cell={cell}
-                            // render={render}
-                            // rerender={rerender}
-                            // selectedCoords={selectedCoords}
-                            // setSelectedCoords={setSelectedCoords}
-                            props={{
-                                cell,
-                                ...props,
-                            }}
+                            cell={cell}
+                            render={props.render}
+                            rerender={props.rerender}
+                            selectedCoords={props.selectedCoords}
+                            setSelectedCoords={props.setSelectedCoords}
+                            theme={props.theme}
+                            // props={{
+                            //     cell,
+                            //     ...props,
+                            // }}
                         />
                     ))}
                 </GridComponent>

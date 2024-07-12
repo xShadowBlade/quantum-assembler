@@ -8,7 +8,7 @@ import { Game } from "../game";
 import { QACell, QACellData, getCellId } from "./qaCell";
 import { cellTypes } from "./cellTypes";
 import type { QACellType} from "./cellTypes";
-import { energy } from "./energy";
+import { energy, instability } from "./energy";
 
 /**
  * Cell properties in the quantum assembler grid
@@ -144,6 +144,23 @@ class QuantumAssember {
         // Run the effect of all cells
         this.grid.getAll().forEach((cell) => {
             cell.properties.cell.effect();
+        });
+
+        // Calculate the energy
+        this.grid.getAll().forEach((cell) => {
+            const QACell = cell.properties.cell;
+
+            energy.boost.setBoost({
+                id: `quantumAssemberGrid.${QACell.x}.${QACell.y}`,
+                value: (x) => x.add(QACell.generation.value),
+                order: 1,
+            });
+
+            instability.boost.setBoost({
+                id: `quantumAssemberGrid.${QACell.x}.${QACell.y}`,
+                value: (x) => x.add(QACell.instability.value),
+                order: 1,
+            });
         });
     }
 }

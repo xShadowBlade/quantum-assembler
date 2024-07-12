@@ -1,7 +1,7 @@
 /**
  * @file Declares the main app component
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Button from "@mui/material/Button";
 
@@ -11,10 +11,21 @@ import type { GridDirectionCell } from "emath.js";
 import type { QACellType } from "./grid/cellTypes";
 
 import GridVisuals from "./grid";
+import CellShop from "./shop";
+import EnergyDisplay from "./energyDisplay";
 
 // Color theme
 import { cellTheme } from "./grid/cellTypeColors";
 import { ThemeProvider } from "@mui/material/styles";
+import { Game } from "./game";
+// import { energy } from "./grid/energy";
+
+
+interface ShopSelectedCell {
+    type: QACellType;
+    tier: Decimal;
+    direction: GridDirectionCell;
+}
 
 
 /**
@@ -27,17 +38,14 @@ const App: React.FC = () => {
 
     /**
      * Rerenders the component
+     * @deprecated The global app componment is automatically rerendered every frame
      */
     function rerender (): void {
         setRender(render + 1);
     };
 
     // The selected cell to buy from the shop
-    const [selectedShopCell, setSelectedShopCell] = useState<{
-        type: QACellType;
-        tier: Decimal;
-        direction: GridDirectionCell;
-    }>({
+    const [selectedShopCell, setSelectedShopCell] = useState<ShopSelectedCell>({
         type: "void",
         tier: new Decimal(0),
         direction: "up",
@@ -45,6 +53,18 @@ const App: React.FC = () => {
 
     // The coordinates of the selected cell (x, y)
     const [selectedCoords, setSelectedCoords] = useState<[number, number]>([0, 0]);
+
+    useEffect(() => {
+        // Rerender every frame
+        Game.eventManager.setEvent("rerender", "interval", 0, (dt) => {
+            rerender();
+
+            // console.log({ dt })
+
+            // Gain energy every frame
+            // energy.gain(dt);
+        });
+    });
 
     return (<ThemeProvider theme={cellTheme}>
         <div style={{
@@ -72,8 +92,18 @@ const App: React.FC = () => {
             >
                 Rerender
             </Button>
+            <hr />
+            <EnergyDisplay />
+            <CellShop
+                rerender={rerender}
+                shopSelectedCell={selectedShopCell}
+                setShopSelectedCell={setSelectedShopCell}
+                selectedCoords={selectedCoords}
+                setSelectedCoords={setSelectedCoords}
+            />
         </div>
     </ThemeProvider>);
 };
 
 export default App;
+export type { ShopSelectedCell };

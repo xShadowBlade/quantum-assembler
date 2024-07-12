@@ -94,6 +94,13 @@ const cellTypes = [
                 // Order 0 is applied first
                 order: 0,
             });
+
+            cell.instability.boost.setBoost({
+                id: `charm-${cell.x}.${cell.y}`,
+                value: () => charmGenerationAmount.div(2),
+                // Order 0 is applied first
+                order: 0,
+            });
         },
     },
     {
@@ -111,7 +118,10 @@ const cellTypes = [
             const instabilityMultiplier = tier.pow(tier.div(2.5)).add(1).round();
 
             // debug
-            console.log("up valueMultiplier", valueMultiplier.format());
+            console.log("up valueMultiplier", {
+                valueMultiplier: valueMultiplier.format(),
+                instabilityMultiplier: instabilityMultiplier.format(),
+            });
 
             // For each cell that this cell is pointing to, set the boost
             cell.getFacingDirection().forEach((cellToSetBoost) => {

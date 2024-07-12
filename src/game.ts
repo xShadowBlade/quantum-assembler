@@ -7,11 +7,21 @@ import { Game as GameClass } from "emath.js/game";
  * Represents the game
  */
 const Game = new GameClass({
+    mode: ((): "development" | "production" => {
+        try {
+            // @ts-expect-error - MODE is replaced by webpack, as type: "development" | "production"
+            return MODE as "development" | "production";
+        } catch {
+            return "development";
+        }
+    })(),
     name: {
         id: "quantum-assembler",
         title: "Quantum Assembler",
     },
-    mode: "development",
+    settings: {
+        framerate: 5,
+    },
 });
 
 if (Game.config.mode === "development") {
