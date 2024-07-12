@@ -5,36 +5,92 @@ import React, { useEffect, useState } from "react";
 import type { ButtonOwnProps } from "@mui/material/Button";
 import Button from "@mui/material/Button";
 import GridComponent from "@mui/material/Grid";
-// import Slider from "@mui/material/Slider";
-// import Checkbox from "@mui/material/Checkbox";
-// import Radio from "@mui/material/Radio";
-// import RadioGroup from "@mui/material/RadioGroup";
-// import FormLabel from "@mui/material/FormLabel";
-// import FormControl from "@mui/material/FormControl";
-// import FormControlLabel from "@mui/material/FormControlLabel";
+import Box from "@mui/material/Box";
 import { Grid, GridCell, GridCellCollection } from "emath.js";
 
 import { quantumAssembler } from "./grid/quantumAssembler";
 import type { QAGridCell } from "./grid/quantumAssembler";
+import { createCellThemeKey } from "./grid/cellTypeColors";
+import type { CellColorOverrideKey } from "./grid/cellTypeColors";
+
+import type { Theme } from "@mui/material/styles";
 
 /**
  * The properties of the grid cell component.
  */
 interface GridCellComponentProps {
     cell: GridCell<QAGridCell>;
+    render: number;
     rerender: () => void;
-    // render: number;
-    // setRender: React.Dispatch<React.SetStateAction<number>>;
-    // selected: GridCell<GridCellProps> | null;
-    // setSelected: (cell: GridCell<QAGridCell>) => void;
+    selectedCoords: [number, number];
+    setSelectedCoords: React.Dispatch<React.SetStateAction<[number, number]>>;
+
+    theme: Theme;
 }
 
-const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
-    const { cell, rerender } = props;
+const GridCellComponent: React.FC<{ props: GridCellComponentProps }> = ({ props }) => {
+    const { cell, setSelectedCoords, theme } = props;
 
-    const [color, setColor] = useState<ButtonOwnProps["color"]>("info");
+    const [color, setColor] = useState<ButtonOwnProps["color"]>(createCellThemeKey("void"));
+
+    const getColor = (shade?: false): CellColorOverrideKey => createCellThemeKey(cell.properties.cell.cellType.type);
+
+    const getBorderColor = (): string => {
+        const borderColor = theme.palette[getColor()];
+
+        // If the cell is selected, make the border color darker
+        const isSelected = cell.x === props.selectedCoords[0] && cell.y === props.selectedCoords[1];
+
+        // return isSelected ? borderColor.dark : borderColor.main;
+
+        if (isSelected) {
+            console.log("Selected", cell.x, cell.y, borderColor.dark, { borderColor });
+            return borderColor.dark;
+            // return "primary";
+        } else {
+            return borderColor.main;
+            // return "secondary";
+        }
+    };
+
+    // TODO: Better way to set the style
+    const [style, setStyle] = useState<React.CSSProperties>({
+        borderRadius: 0,
+        border: 5,
+        // borderColor: getBorderColor(),
+        get borderColor () {
+            // console.log("Getting border color", cell.x, cell.y);
+            return getBorderColor();
+        },
+    });
+
+    // On render, set the color
+    useEffect(() => {
+        // console.log("Setting color", cell.x, cell.y, getColor());
+        setColor(getColor());
+
+        // setStyle({
+        //     borderRadius: 0,
+        //     border: 5,
+        //     borderColor: getBorderColor(),
+        // });
+    }, [props.render]);
 
     return (
+    // <Box
+    //     // style={{
+    //     //     border: "5px solid",
+    //     //     borderColor: getBorderColor(),
+    //     //     width: "50px",
+    //     //     height: "50px",
+    //     //     margin: "10px",
+    //     // }}
+    //     height={50}
+    //     width={50}
+    //     border={5}
+    //     borderColor={getBorderColor()}
+    //     margin={1}
+    // >
         <Button
             variant="contained"
             color={color}
@@ -42,35 +98,39 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
                 // cell.properties.selected = !cell.properties.selected;
                 // setSelected(cell);
 
+                // Set the selected coordinates
+                setSelectedCoords([cell.x, cell.y]);
+
                 // Reload the grid
-                rerender();
+                // rerender();
+                props.rerender();
             }}
             style={{
                 margin: "10px",
                 width: "50px",
                 height: "50px",
+                // borderRadius: "0",
+                // border: "5px solid",
+                // borderColor: getBorderColor(),
             }}
+            sx={style}
         >
             {cell.properties.cell.cellType.character}
         </Button>
+    // </Box>
     );
 };
 
-interface GridCellProps {
-    // render: number;
-    // setRender: React.Dispatch<React.SetStateAction<number>>;
-    rerender: () => void;
-}
+type GridCellProps = Omit<GridCellComponentProps, "cell">
 
 /**
  * @returns The grid component.
  * @param props - The properties of the grid component.
  */
 const GridVisuals: React.FC<GridCellProps> = (props) => {
-    const { rerender } = props;
 
     // The selected cell
-    const [selected, setSelected] = useState<GridCell<QAGridCell> | null>(null);
+    // const [selected, setSelected] = useState<GridCell<QAGridCell> | null>(null);
 
     return (<>
         <h3>Grid</h3>
@@ -82,8 +142,15 @@ const GridVisuals: React.FC<GridCellProps> = (props) => {
                     {row.map((cell, cellIndex) => (
                         <GridCellComponent
                             key={cellIndex}
-                            cell={cell}
-                            rerender={rerender}
+                            // cell={cell}
+                            // render={render}
+                            // rerender={rerender}
+                            // selectedCoords={selectedCoords}
+                            // setSelectedCoords={setSelectedCoords}
+                            props={{
+                                cell,
+                                ...props,
+                            }}
                         />
                     ))}
                 </GridComponent>

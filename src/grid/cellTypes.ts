@@ -7,6 +7,10 @@ import { Game } from "../game";
 import type { QACell } from "./qaCell";
 import type { QAGridCell } from "./quantumAssembler";
 
+// Color
+import * as colors from "@mui/material/colors";
+
+
 /**
  * The static spawner of a cell in the quantum assembler grid
  */
@@ -45,6 +49,11 @@ interface QACellStaticSpawner {
      * The image of the cell
      */
     image?: string;
+
+    /**
+     * The color of the cell
+     */
+    color?: string;
 }
 
 /**
@@ -54,16 +63,17 @@ const cellTypes = [
     {
         type: "void",
         character: "V",
+        color: colors.blueGrey[100],
         upgrade: {
             name: "Void",
             description: "Does nothing.",
             cost: (): Decimal => Decimal.dZero,
         },
-        // image: "",
     },
     {
         type: "charm",
         character: "C",
+        color: colors.pink[100],
         upgrade: {
             name: "Charm Quark",
             description: "Charm Quark: generates charm.",
@@ -89,6 +99,7 @@ const cellTypes = [
     {
         type: "up",
         character: "U",
+        color: colors.purple[100],
         upgrade: {
             name: "Up Quark",
             description: "Up Quark: increases value by (TODO) and instability by (TODO).",
@@ -127,6 +138,7 @@ const cellTypes = [
     {
         type: "down",
         character: "D",
+        color: colors.green[100],
         upgrade: {
             name: "Down Quark",
             description: "Down Quark: decreases instability by (TODO).",
@@ -151,6 +163,7 @@ const cellTypes = [
     {
         type: "strange",
         character: "S",
+        color: colors.orange[100],
         upgrade: {
             name: "Strange Quark",
             description: "Strange Quark: ends the assembler. (currently does nothing)",
@@ -160,6 +173,7 @@ const cellTypes = [
     {
         type: "top",
         character: "T",
+        color: colors.red[100],
         upgrade: {
             name: "Top Quark",
             description: "Top Quark: Increases the pointing up quark's value by (TODO) and increases instability by (TODO).",
@@ -171,6 +185,7 @@ const cellTypes = [
     {
         type: "graviton",
         character: "G",
+        color: colors.grey[100],
         special: true,
         upgrade: {
             name: "Graviton",
@@ -181,6 +196,7 @@ const cellTypes = [
     {
         type: "higgsBoson",
         character: "H",
+        color: colors.indigo[100],
         special: true,
         upgrade: {
             name: "Higgs Boson",
@@ -191,6 +207,7 @@ const cellTypes = [
     {
         type: "zBoson",
         character: "Z",
+        color: colors.teal[100],
         special: true,
         upgrade: {
             name: "Z Boson",
@@ -201,6 +218,7 @@ const cellTypes = [
     {
         type: "wBoson",
         character: "W",
+        color: colors.blue[100],
         special: true,
         upgrade: {
             name: "W Boson",
@@ -211,6 +229,7 @@ const cellTypes = [
     {
         type: "gluon",
         character: "G",
+        color: colors.yellow[100],
         special: true,
         upgrade: {
             name: "Gluon",
@@ -224,6 +243,7 @@ const cellTypes = [
     {
         type: "singularity",
         character: "X",
+        color: colors.grey[900],
         special: true,
         upgrade: {
             name: "Singularity",
@@ -233,6 +253,7 @@ const cellTypes = [
     },
 ] as const satisfies QACellStaticSpawner[];
 
+type QACellEntry = typeof cellTypes[number];
 type QACellType = typeof cellTypes[number]["type"];
 
 // Debugging
@@ -346,4 +367,4 @@ if (Game.config.mode === "development") {
 }
 
 export { cellTypes };
-export type { QACellStaticSpawner, QACellType };
+export type { QACellStaticSpawner, QACellType, QACellEntry };

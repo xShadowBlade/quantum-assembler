@@ -1,13 +1,12 @@
 /**
  * @file Declares the quantum assembler feature (basically reactor grid)
  */
-import { Grid, GridCellCollection, Decimal, AttributeStatic } from "emath.js";
-import type { GridCell, GridDirectionCell, DecimalSource } from "emath.js";
-import { Exclude, Expose, Type } from "class-transformer";
+import { Decimal, AttributeStatic } from "emath.js";
+import type { GridCell, GridDirectionCell } from "emath.js";
+import { Expose, Type } from "class-transformer";
 import { Game } from "../game";
 import { cellTypes } from "./cellTypes";
-import type { QACellType, QACellStaticSpawner } from "./cellTypes";
-import { energy } from "./energy";
+import type { QACellType, QACellStaticSpawner, QACellEntry } from "./cellTypes";
 
 import { quantumAssembler } from "./quantumAssembler";
 import type { QAGridCell } from "./quantumAssembler";
@@ -75,8 +74,8 @@ class QACellData {
  */
 class QACell {
     /** @returns The cell type */
-    public get cellType (): QACellStaticSpawner {
-        return cellTypes.find((cell) => cell.type === this.data.type) as QACellStaticSpawner;
+    public get cellType (): QACellEntry {
+        return cellTypes.find((cell) => cell.type === this.data.type) ?? cellTypes[0];
     }
 
     /** The x-coordinate of the cell */
@@ -124,7 +123,7 @@ class QACell {
     public get tier (): Decimal {
         // return this.data.tier;
 
-        const tierToReturn = this.data.tier as Decimal | { sign: number; layer: number; mag: number; };
+        const tierToReturn = this.data.tier as Decimal | { sign: number; layer: number; mag: number };
 
         // Sometimes when serializing, the tier is not a Decimal. This is a workaround.
         if (tierToReturn instanceof Decimal) {
@@ -206,7 +205,13 @@ class QACell {
      * Runs the effect of the cell
      */
     public effect (): void {
-        this.cellType.effect?.(this.tier, this, quantumAssembler.grid);
+        // this.cellType.effect?.(this.tier, this, quantumAssembler.grid);
+
+        // if ("effect" in this.cellType) {
+        //     (this.cellType as QACellStaticSpawner).effect(this.tier, this, quantumAssembler.grid);
+        // }
+
+        (this.cellType as QACellStaticSpawner).effect?.(this.tier, this, quantumAssembler.grid);
     }
 }
 
