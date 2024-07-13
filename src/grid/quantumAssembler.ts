@@ -11,6 +11,12 @@ import type { QACellType} from "./cellTypes";
 import { energy, instability } from "./energy";
 
 /**
+ * The direction to rotate a cell.
+ * `"cw"` for clockwise, `"ccw"` for counter-clockwise
+ */
+type RotateDirection = "cw" | "ccw";
+
+/**
  * Cell properties in the quantum assembler grid
  */
 interface QAGridCell {
@@ -64,7 +70,7 @@ class QuantumAssember {
      * @param tier The tier of the cell
      * @param direction The direction of the cell
      */
-    public setCell (x: number, y: number, type: QACellType, tier: DecimalSource = 1, direction: GridDirectionCell = "up"): void {
+    public setCell (x: number, y: number, type: QACellType = "void", tier: DecimalSource = 1, direction: GridDirectionCell = "up"): void {
         tier = new Decimal(tier);
 
         // Set the cell data
@@ -94,6 +100,36 @@ class QuantumAssember {
 
         // If the purchase was successful, set the selected cell
         this.setCell(x, y, type, tier, direction);
+    }
+
+    /**
+     * Rotates a cell in the quantum assembler grid
+     * @param x - The x-coordinate of the cell
+     * @param y - The y-coordinate of the cell
+     * @param direction - The direction to rotate the cell. `"cw"` for clockwise, `"ccw"` for counter-clockwise
+     */
+    public rotateCell (x: number, y: number, direction: GridDirectionCell | RotateDirection): void {
+        const cell = this.getCell(x, y);
+
+        // Set the direction of the cell
+        // cell.direction = direction;
+
+        switch (direction) {
+            case "cw":
+                // Rotate the cell clockwise
+                cell.direction = cell.direction === "up" ? "right" : cell.direction === "right" ? "down" : cell.direction === "down" ? "left" : "up";
+                break;
+            case "ccw":
+                // Rotate the cell counter-clockwise
+                cell.direction = cell.direction === "up" ? "left" : cell.direction === "left" ? "down" : cell.direction === "down" ? "right" : "up";
+                break;
+            default:
+                cell.direction = direction;
+                break;
+        }
+
+        // Reload the grid
+        this.reloadGrid();
     }
 
     /**
@@ -178,4 +214,4 @@ if (Game.config.mode === "development") {
 }
 
 export { QuantumAssember, quantumAssembler };
-export type { QAGridCell };
+export type { QAGridCell, RotateDirection };

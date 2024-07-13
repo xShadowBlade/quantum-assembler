@@ -6,14 +6,16 @@ import type { ButtonOwnProps } from "@mui/material/Button";
 import Button from "@mui/material/Button";
 import GridComponent from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import { Grid, GridCell, GridCellCollection } from "emath.js";
+import { Grid, GridCell, GridCellCollection, GridDirectionCell } from "emath.js";
 
 import { quantumAssembler } from "./grid/quantumAssembler";
-import type { QAGridCell } from "./grid/quantumAssembler";
+import type { QAGridCell, RotateDirection } from "./grid/quantumAssembler";
 import { createCellThemeKey } from "./grid/cellTypeColors";
 import type { CellColorOverrideKey } from "./grid/cellTypeColors";
 
 import type { Theme } from "@mui/material/styles";
+import { cellTypes } from "./grid/cellTypes";
+import type { CellSelectMode } from "./app";
 
 /**
  * The properties of the grid cell component.
@@ -26,7 +28,16 @@ interface GridCellComponentProps {
     setSelectedCoords: React.Dispatch<React.SetStateAction<[number, number]>>;
 
     theme: Theme;
+    cellSelectMode: CellSelectMode;
+    cellRotationDirection: RotateDirection;
 }
+
+const directions: Record<GridDirectionCell, string> = {
+    up: "↑",
+    down: "↓",
+    left: "←",
+    right: "→",
+};
 
 const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
     const { cell, setSelectedCoords, theme } = props;
@@ -100,11 +111,27 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
                 // setSelected(cell);
 
                 // Set the selected coordinates
-                setSelectedCoords([cell.x, cell.y]);
+                // setSelectedCoords([cell.x, cell.y]);
+
+                switch (props.cellSelectMode) {
+                    case "select":
+                        setSelectedCoords([cell.x, cell.y]);
+                        break;
+                    // case "place":
+                    //     quantumAssembler.setCell(cell.x, cell.y, "basic", 1, "up");
+                    //     break;
+                    case "rotate":
+                        quantumAssembler.rotateCell(cell.x, cell.y, props.cellRotationDirection);
+                        break;
+                    case "remove":
+                        quantumAssembler.setCell(cell.x, cell.y);
+                        break;
+                }
 
                 // Reload the grid
                 // rerender();
                 props.rerender();
+                quantumAssembler.reloadGrid();
             }}
             style={{
                 margin: "10px",
@@ -116,7 +143,7 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
             }}
             sx={style}
         >
-            {cell.properties.cell.cellType.character}
+            {cell.properties.cell.cellType.character} {directions[cell.properties.cell.direction]}
         </Button>
     // </Box>
     );
@@ -149,6 +176,8 @@ const GridVisuals: React.FC<GridCellProps> = (props) => {
                             selectedCoords={props.selectedCoords}
                             setSelectedCoords={props.setSelectedCoords}
                             theme={props.theme}
+                            cellSelectMode={props.cellSelectMode}
+                            cellRotationDirection={props.cellRotationDirection}
                             // props={{
                             //     cell,
                             //     ...props,
@@ -158,6 +187,31 @@ const GridVisuals: React.FC<GridCellProps> = (props) => {
                 </GridComponent>
             ))}
         </GridComponent>
+
+        <hr />
+
+        {/* List of all buttons (debug) */}
+        <h4>Buttons</h4>
+        {cellTypes.map((cellType) => (
+            <Button
+                key={cellType.type}
+                variant="contained"
+                color={createCellThemeKey(cellType.type)}
+                style={{
+                    margin: "10px",
+                    width: "50px",
+                    height: "50px",
+                }}
+                // onClick={() => {
+                //     console.log("Selected", cellType.type);
+                //     props.setSelectedCellType(cellType.type);
+                // }}
+            >
+                {cellType.character}
+            </Button>
+        ))}
+
+        <hr />
     </>);
 };
 

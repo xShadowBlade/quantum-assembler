@@ -86,7 +86,7 @@ const cellTypes = [
             const charmGenerationAmount = tier.pow(tier.div(1.5)).round();
 
             // debug
-            console.log("charmGenerationAmount", charmGenerationAmount.format());
+            // console.log("charmGenerationAmount", charmGenerationAmount.format());
 
             cell.generation.boost.setBoost({
                 id: `charm-${cell.x}.${cell.y}`,
@@ -118,10 +118,10 @@ const cellTypes = [
             const instabilityMultiplier = tier.pow(tier.div(2.5)).add(1).round();
 
             // debug
-            console.log("up valueMultiplier", {
-                valueMultiplier: valueMultiplier.format(),
-                instabilityMultiplier: instabilityMultiplier.format(),
-            });
+            // console.log("up valueMultiplier", {
+            //     valueMultiplier: valueMultiplier.format(),
+            //     instabilityMultiplier: instabilityMultiplier.format(),
+            // });
 
             // For each cell that this cell is pointing to, set the boost
             cell.getFacingDirection().forEach((cellToSetBoost) => {
@@ -148,7 +148,7 @@ const cellTypes = [
     {
         type: "down",
         character: "D",
-        color: colors.green[100],
+        color: colors.orange[100],
         upgrade: {
             name: "Down Quark",
             description: "Down Quark: decreases instability by (TODO).",
@@ -173,7 +173,7 @@ const cellTypes = [
     {
         type: "strange",
         character: "S",
-        color: colors.orange[100],
+        color: colors.green[100],
         upgrade: {
             name: "Strange Quark",
             description: "Strange Quark: ends the assembler. (currently does nothing)",

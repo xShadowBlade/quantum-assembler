@@ -13,20 +13,21 @@ import type { QACellType } from "./grid/cellTypes";
 import GridVisuals from "./grid";
 import CellShop from "./shop";
 import EnergyDisplay from "./energyDisplay";
+import CellSelectModeComponent from "./cellSelectMode";
+import type { CellSelectMode } from "./cellSelectMode";
 
 // Color theme
 import { cellTheme } from "./grid/cellTypeColors";
 import { ThemeProvider } from "@mui/material/styles";
 import { Game } from "./game";
 // import { energy } from "./grid/energy";
-
+import type { RotateDirection } from "./grid/quantumAssembler";
 
 interface ShopSelectedCell {
     type: QACellType;
     tier: Decimal;
     direction: GridDirectionCell;
 }
-
 
 /**
  * The main app component. Also contains global / shared state and functions.
@@ -51,6 +52,12 @@ const App: React.FC = () => {
         direction: "up",
     });
 
+    // The mode of the cell selection
+    const [cellSelectMode, setCellSelectMode] = useState<CellSelectMode>("select");
+
+    // The direction to rotate a cell
+    const [cellRotationDirection, setCellRotationDirection] = useState<RotateDirection>("cw");
+
     // The coordinates of the selected cell (x, y)
     const [selectedCoords, setSelectedCoords] = useState<[number, number]>([0, 0]);
 
@@ -74,16 +81,24 @@ const App: React.FC = () => {
             // justifyContent: "center",
         }}>
             <h1>Quantum Assembler</h1>
+            <EnergyDisplay />
             <GridVisuals
                 render={render}
                 rerender={rerender}
                 selectedCoords={selectedCoords}
                 setSelectedCoords={setSelectedCoords}
                 theme={cellTheme}
+                cellSelectMode={cellSelectMode}
+                cellRotationDirection={cellRotationDirection}
             />
 
             {/* Debug */}
             Selected: ({selectedCoords[0]}, {selectedCoords[1]})
+            <br />
+            <CellSelectModeComponent
+                cellSelectMode={cellSelectMode}
+                setCellSelectMode={setCellSelectMode}
+            />
             <br />
             <Button
                 onClick={() => {
@@ -93,7 +108,6 @@ const App: React.FC = () => {
                 Rerender
             </Button>
             <hr />
-            <EnergyDisplay />
             <CellShop
                 rerender={rerender}
                 shopSelectedCell={selectedShopCell}
@@ -106,4 +120,4 @@ const App: React.FC = () => {
 };
 
 export default App;
-export type { ShopSelectedCell };
+export type { ShopSelectedCell, CellSelectMode };

@@ -7,12 +7,20 @@ import { Decimal } from "emath.js";
 import { energy, instability } from "./grid/energy";
 
 const EnergyDisplay: React.FC = () => {
+    const energyValue = energy.value;
+    const instabilityValue = instability.value;
+
+    // TODO: Fix attribute not resetting
+
+    const energyGain = energyValue.formatGain(energy.boost.calculate());
+    const instabilityGain = instabilityValue.formatGain(instability.boost.calculate());
+
     return (
         <p>
             {/* Energy: {Decimal.formats.ev(energy.value)} */}
-            Energy: {energy.value.format()} {energy.value.formatGain(energy.boost.calculate())}
+            Energy: {energyValue.format()} {energyGain}
             <br />
-            Instability: {instability.value.format()} {instability.value.formatGain(instability.boost.calculate())}
+            Instability: {instabilityValue.format()} {instabilityGain}
         </p>
     );
 }

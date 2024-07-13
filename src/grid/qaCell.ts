@@ -79,10 +79,10 @@ class QACell {
     }
 
     /** The x-coordinate of the cell */
-    public x: number;
+    public readonly x: number;
 
     /** The y-coordinate of the cell */
-    public y: number;
+    public readonly y: number;
 
     /**
      * @returns The data of the cell
@@ -113,10 +113,16 @@ class QACell {
     public get type (): QACellType {
         return this.data.type;
     }
+    public set type (value: QACellType) {
+        this.data.type = value;
+    }
 
     /** @returns The direction of the cell */
     public get direction (): GridDirectionCell {
         return this.data.direction;
+    }
+    public set direction (value: GridDirectionCell) {
+        this.data.direction = value
     }
 
     /** @returns The tier of the cell */
@@ -129,9 +135,12 @@ class QACell {
         if (tierToReturn instanceof Decimal) {
             return tierToReturn;
         } else {
-            console.warn("Tier is not a Decimal", tierToReturn);
+            // console.warn("Tier is not a Decimal", tierToReturn);
             return Decimal.fromComponents(tierToReturn.sign, tierToReturn.layer, tierToReturn.mag);
         }
+    }
+    public set tier (value: Decimal) {
+        this.data.tier = value;
     }
 
     /** @returns The grid cell of the cell */
@@ -143,13 +152,13 @@ class QACell {
      * The energy energy generation of the cell.
      * It is an attribute so it can be affected by boosts such as up quarks.
      */
-    public generation: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
+    public readonly generation: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
 
     /**
      * The instability generation of the cell.
      * It is an attribute so it can be affected by boosts such as down quarks.
      */
-    public instability: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
+    public readonly instability: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
 
     /**
      * Initializes a new instance of the QACell class
