@@ -63,6 +63,14 @@ class QuantumAssember {
     }
 
     /**
+     * Gets all cells from the quantum assembler grid
+     * @returns All cells
+     */
+    public getAllCells (): QACell[] {
+        return this.grid.getAll().map(cell => cell.properties.cell);
+    }
+
+    /**
      * Sets a cell in the quantum assembler grid
      * @param x The x-coordinate of the cell
      * @param y The y-coordinate of the cell
@@ -177,24 +185,37 @@ class QuantumAssember {
      * Reloads the quantum assembler grid
      */
     public reloadGrid (): void {
-        // Run the effect of all cells
-        this.grid.getAll().forEach((cell) => {
-            cell.properties.cell.effect();
+        const allCells = this.getAllCells();
+
+        // Clear the boosts of all cells and energy
+        allCells.forEach((cell) => {
+            cell.generation.boost.clearBoosts();
+            cell.instability.boost.clearBoosts();
         });
 
-        // Calculate the energy
-        this.grid.getAll().forEach((cell) => {
-            const QACell = cell.properties.cell;
+        // Run the effect of all cells
+        allCells.forEach((cell) => {
+            cell.effect();
+        });
 
+        // If the grid is invalid, return
+        if (!this.isGridValid()) {
+            energy.boost.clearBoosts();
+            instability.boost.clearBoosts();
+            return;
+        }
+
+        // Calculate the energy
+        allCells.forEach((cell) => {
             energy.boost.setBoost({
-                id: `quantumAssemberGrid.${QACell.x}.${QACell.y}`,
-                value: (x) => x.add(QACell.generation.value),
+                id: `quantumAssemberGrid.${cell.x}.${cell.y}`,
+                value: (x) => x.add(cell.generation.value),
                 order: 1,
             });
 
             instability.boost.setBoost({
-                id: `quantumAssemberGrid.${QACell.x}.${QACell.y}`,
-                value: (x) => x.add(QACell.instability.value),
+                id: `quantumAssemberGrid.${cell.x}.${cell.y}`,
+                value: (x) => x.add(cell.instability.value),
                 order: 1,
             });
         });

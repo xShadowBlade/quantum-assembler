@@ -71,51 +71,21 @@ const cellTypes = [
         },
     },
     {
-        type: "charm",
-        character: "C",
-        color: colors.pink[100],
-        upgrade: {
-            name: "Charm Quark",
-            description: "Charm Quark: generates charm.",
-            cost: (tier): Decimal => tier.pow(tier.plus(2.5)).round(),
-            // cost: (tier): Decimal => Decimal.pow(3, tier.add(tier.div(5).pow(1.3)).pow(1.4)).round(),
-            // cost: (tier): Decimal => tier.mul(2).add(Decimal.pow(2, tier)).pow(tier).round(),
-        },
-        effect (tier, cell): void {
-            // TODO: Better formula
-            const charmGenerationAmount = tier.pow(tier.div(1.5)).round();
-
-            // debug
-            // console.log("charmGenerationAmount", charmGenerationAmount.format());
-
-            cell.generation.boost.setBoost({
-                id: `charm-${cell.x}.${cell.y}`,
-                value: () => charmGenerationAmount,
-                // Order 0 is applied first
-                order: 0,
-            });
-
-            cell.instability.boost.setBoost({
-                id: `charm-${cell.x}.${cell.y}`,
-                value: () => charmGenerationAmount.div(2),
-                // Order 0 is applied first
-                order: 0,
-            });
-        },
-    },
-    {
         type: "up",
         character: "U",
         color: colors.purple[100],
         upgrade: {
             name: "Up Quark",
             description: "Up Quark: increases value by (TODO) and instability by (TODO).",
-            cost: (tier): Decimal => tier.pow(tier.plus(4).mul(1.25)).add(4).round(),
+            // cost: (tier): Decimal => tier.pow(tier.plus(4).mul(1.25)).add(4).round(),
+            // cost: (tier): Decimal => Decimal.pow(1.1, Decimal.scale(tier, 1e6, 2, 0)).mul(10),
+            // \left(2x+2^{\frac{x}{1.9}}\right)^{x}
+            cost: (tier): Decimal => tier.mul(3).add(Decimal.pow(2, tier.div(1.4)).round()).pow(tier),
         },
         effect (tier, cell): void {
             // TODO: Better formula
             const valueMultiplier = tier.pow(tier.div(2)).add(1).round();
-            const instabilityMultiplier = tier.pow(tier.div(2.5)).add(1).round();
+            const instabilityMultiplier = tier.pow(tier.div(1.5)).add(1).round();
 
             // debug
             // console.log("up valueMultiplier", {
@@ -125,7 +95,7 @@ const cellTypes = [
 
             // For each cell that this cell is pointing to, set the boost
             cell.getFacingDirection().forEach((cellToSetBoost) => {
-                console.log("cellToSetBoost", cellToSetBoost);
+                // console.log("cellToSetBoost", cellToSetBoost);
 
                 // Set the value boost
                 cellToSetBoost.generation.boost.setBoost({
@@ -171,6 +141,40 @@ const cellTypes = [
         },
     },
     {
+        type: "charm",
+        character: "C",
+        color: colors.pink[100],
+        upgrade: {
+            name: "Charm Quark",
+            description: "Charm Quark: generates charm.",
+            cost: (tier): Decimal => tier.pow(tier.plus(2.5)).round(),
+            // cost: (tier): Decimal => Decimal.pow(3, tier.add(tier.div(5).pow(1.3)).pow(1.4)).round(),
+            // cost: (tier): Decimal => tier.mul(2).add(Decimal.pow(2, tier)).pow(tier).round(),
+        },
+        effect (tier, cell): void {
+            // TODO: Better formula
+            const energyGenerationAmount = tier.pow(tier.div(1.5)).round();
+            const instabilityGenerationAmount = tier.pow(tier.div(2)).div(2).round();
+
+            // debug
+            // console.log("charmGenerationAmount", charmGenerationAmount.format());
+
+            cell.generation.boost.setBoost({
+                id: `charm-${cell.x}.${cell.y}`,
+                value: () => energyGenerationAmount,
+                // Order 0 is applied first
+                order: 0,
+            });
+
+            cell.instability.boost.setBoost({
+                id: `charm-${cell.x}.${cell.y}`,
+                value: () => instabilityGenerationAmount,
+                // Order 0 is applied first
+                order: 0,
+            });
+        },
+    },
+    {
         type: "strange",
         character: "S",
         color: colors.green[100],
@@ -190,6 +194,16 @@ const cellTypes = [
             cost: (tier): Decimal => tier.pow(tier.plus(5).mul(1.5)).add(999).round(),
         },
     },
+    {
+        type: "bottom",
+        character: "B",
+        color: colors.brown[100],
+        upgrade: {
+            name: "Bottom Quark",
+            description: "Bottom Quark: Decreases the pointing down quark's instability by (TODO).",
+            cost: (tier): Decimal => tier.pow(tier.plus(4.5).mul(1.5)).add(999).round(),
+        },
+    },
 
     // special (1 max per grid)
     {
@@ -205,6 +219,7 @@ const cellTypes = [
     },
     {
         type: "higgsBoson",
+        // character: "H⁰",
         character: "H",
         color: colors.indigo[100],
         special: true,
@@ -216,6 +231,7 @@ const cellTypes = [
     },
     {
         type: "zBoson",
+        // character: "Z±",
         character: "Z",
         color: colors.teal[100],
         special: true,
@@ -253,7 +269,7 @@ const cellTypes = [
     {
         type: "singularity",
         character: "X",
-        color: colors.grey[900],
+        color: colors.blueGrey[800],
         special: true,
         upgrade: {
             name: "Singularity",
@@ -263,6 +279,13 @@ const cellTypes = [
     },
 ] as const satisfies QACellStaticSpawner[];
 
+cellTypes.forEach((cell) => {
+    const oldCost = cell.upgrade.cost.bind(cell.upgrade);
+
+    // @ts-expect-error - Assigning to read-only
+    cell.upgrade.cost = (tier: Decimal): Decimal => roundingBase(oldCost(tier), 10, 2);
+});
+
 type QACellEntry = typeof cellTypes[number];
 type QACellType = typeof cellTypes[number]["type"];
 
@@ -270,7 +293,7 @@ type QACellType = typeof cellTypes[number]["type"];
 if (Game.config.mode === "development") {
     Object.assign(window, {
         cellTypes,
-        tableCells: (startCollapsed = true, exclude: QACellType[] = ["void", "singularity", "gluon"]) => {
+        tableCells: (startCollapsed = true, include: QACellType[] = cellTypes.map(type => type.type), exclude: QACellType[] = ["void", "singularity", "gluon"]) => {
             // Log table of cell types cost
             const tiersToTable: Decimal[] = ([
                 1,
@@ -320,7 +343,7 @@ if (Game.config.mode === "development") {
             // For each cell type, table the cost of each tier (seperate table for each cell type)
             cellTypes.forEach((cell) => {
                 // Skip excluded cell types
-                if (exclude.includes(cell.type)) {
+                if (!include.includes(cell.type) || exclude.includes(cell.type)) {
                     return;
                 }
 
