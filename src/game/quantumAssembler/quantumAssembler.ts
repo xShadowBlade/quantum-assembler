@@ -1,5 +1,5 @@
 /**
- * @file Declares the quantum assembler grid class and inits it
+ * @file Declares the quantum assembler grid class and inits it.
  */
 import { Grid, Decimal } from "emath.js";
 import type { DecimalSource, GridDirectionCell } from "emath.js";
@@ -8,7 +8,7 @@ import { Game } from "../game";
 import { QACell, QACellData, getCellId } from "./qaCell";
 import { cellTypes } from "./cellTypes";
 import type { QACellType} from "./cellTypes";
-import { energy, instability } from "./energy";
+import { energy, instability } from "../energy";
 
 /**
  * The direction to rotate a cell.
@@ -24,12 +24,14 @@ interface QAGridCell {
 }
 
 /**
- * The quantum assembler class.
+ * The quantum assembler grid class contains methods to interact with the quantum assembler grid, such as: setting cells, rotating cells, etc.
+ * It contains the grid of the quantum assembler, which is a 7x7 grid of cells {@link QACell}.
+ *
  * Use {@link quantumAssembler} to access the quantum assembler.
  */
 class QuantumAssember {
     /**
-     * The grid of the quantum assembler
+     * The grid of the quantum assembler. It is a 7x7 grid of cells {@link QACell}.
      */
     public grid: Grid<QAGridCell>;
 
@@ -120,8 +122,6 @@ class QuantumAssember {
         const cell = this.getCell(x, y);
 
         // Set the direction of the cell
-        // cell.direction = direction;
-
         switch (direction) {
             case "cw":
                 // Rotate the cell clockwise

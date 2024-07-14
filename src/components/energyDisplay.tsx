@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { Button } from "@mui/material";
 import { Decimal } from "emath.js";
-import { energy, instability } from "./grid/energy";
+import { energy, instability } from "../game/energy";
 
 const EnergyDisplay: React.FC = () => {
     const energyValue = energy.value;

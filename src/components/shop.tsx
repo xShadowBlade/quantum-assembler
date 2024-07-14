@@ -6,9 +6,9 @@ import { Button } from "@mui/material";
 import { Decimal } from "emath.js";
 import type { GridDirectionCell } from "emath.js";
 // import { setCell } from "./grid/qaCell";
-import type { QACellType } from "./grid/cellTypes";
-import { energy } from "./grid/energy";
-import type { ShopSelectedCell } from "./app";
+import type { QACellType } from "../game/quantumAssembler/cellTypes";
+import { energy } from "../game/energy";
+import type { ShopSelectedCell } from "../app";
 
 /**
  * The props of the cell shop component

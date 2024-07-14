@@ -8,20 +8,20 @@ import Button from "@mui/material/Button";
 import { Decimal } from "emath.js";
 import type { GridDirectionCell } from "emath.js";
 
-import type { QACellType } from "./grid/cellTypes";
+import type { QACellType } from "./game/quantumAssembler/cellTypes";
 
-import GridVisuals from "./grid";
-import CellShop from "./shop";
-import EnergyDisplay from "./energyDisplay";
-import CellSelectModeComponent from "./cellSelectMode";
-import type { CellSelectMode } from "./cellSelectMode";
+import GridVisuals from "./components/grid/grid";
+import CellShop from "./components/shop";
+import EnergyDisplay from "./components/energyDisplay";
+import CellSelectModeComponent from "./components/grid/cellSelectMode";
+import type { CellSelectMode } from "./components/grid/cellSelectMode";
 
 // Color theme
-import { cellTheme } from "./grid/cellTypeColors";
+import { cellTheme } from "./game/quantumAssembler/cellTypeColors";
 import { ThemeProvider } from "@mui/material/styles";
-import { Game } from "./game";
+import { Game } from "./game/game";
 // import { energy } from "./grid/energy";
-import type { RotateDirection } from "./grid/quantumAssembler";
+import type { RotateDirection } from "./game/quantumAssembler/quantumAssembler";
 
 interface ShopSelectedCell {
     type: QACellType;

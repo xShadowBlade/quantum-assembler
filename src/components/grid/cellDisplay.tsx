@@ -2,7 +2,7 @@
  * @file Declares the cell display component
  */
 import React, { useState } from "react";
-import type { QACell } from "./grid/qaCell";
+import type { QACell } from "../../game/quantumAssembler/qaCell";
 
 /**
  * The properties of the cell display component

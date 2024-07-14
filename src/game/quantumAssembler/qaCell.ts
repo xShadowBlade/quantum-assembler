@@ -1,5 +1,7 @@
 /**
- * @file Declares the quantum assembler feature (basically reactor grid)
+ * @file Declares the quantum assembler cell class.
+ * It contains the data of a cell in the quantum assembler grid, {@link QACellData},
+ * and the cell class, {@link QACell}.
  */
 import { Decimal, AttributeStatic } from "emath.js";
 import type { GridCell, GridDirectionCell } from "emath.js";
@@ -12,7 +14,7 @@ import { quantumAssembler } from "./quantumAssembler";
 import type { QAGridCell } from "./quantumAssembler";
 
 /**
- * The cell ID of a cell in the quantum assembler grid data
+ * The cell ID of a cell in the quantum assembler grid game data
  */
 type CellId = `quantumAssemblerGrid.${number}.${number}.cell`;
 
@@ -27,7 +29,7 @@ function getCellId (x: number, y: number): CellId {
 }
 
 /**
- * Represents the data of a cell in the quantum assembler grid
+ * The data of a cell in the quantum assembler grid
  */
 class QACellData {
     /** The type of the cell */
@@ -69,7 +71,7 @@ class QACellData {
 }
 
 /**
- * Represents a cell class in the quantum assembler grid.
+ * A cell class in the quantum assembler grid.
  * This class can represent any type of cell. The type of the cell is stored in the data property.
  */
 class QACell {
@@ -122,13 +124,11 @@ class QACell {
         return this.data.direction;
     }
     public set direction (value: GridDirectionCell) {
-        this.data.direction = value
+        this.data.direction = value;
     }
 
     /** @returns The tier of the cell */
     public get tier (): Decimal {
-        // return this.data.tier;
-
         const tierToReturn = this.data.tier as Decimal | { sign: number; layer: number; mag: number };
 
         // Sometimes when serializing, the tier is not a Decimal. This is a workaround.
@@ -227,11 +227,9 @@ class QACell {
 // Debugging
 if (Game.config.mode === "development") {
     Object.assign(window, {
-        // getCellTypeFromGrid,
-        // isGridValid,
-        // reloadGrid,
-        // setCell,
-        // buyCell,
+        QACell,
+        QACellData,
+        getCellId,
     });
 }
 

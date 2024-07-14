@@ -8,14 +8,14 @@ import GridComponent from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import { Grid, GridCell, GridCellCollection, GridDirectionCell } from "emath.js";
 
-import { quantumAssembler } from "./grid/quantumAssembler";
-import type { QAGridCell, RotateDirection } from "./grid/quantumAssembler";
-import { createCellThemeKey } from "./grid/cellTypeColors";
-import type { CellColorOverrideKey } from "./grid/cellTypeColors";
+import { quantumAssembler } from "../../game/quantumAssembler/quantumAssembler";
+import type { QAGridCell, RotateDirection } from "../../game/quantumAssembler/quantumAssembler";
+import { createCellThemeKey } from "../../game/quantumAssembler/cellTypeColors";
+import type { CellColorOverrideKey } from "../../game/quantumAssembler/cellTypeColors";
 
 import type { Theme } from "@mui/material/styles";
-import { cellTypes } from "./grid/cellTypes";
-import type { CellSelectMode } from "./app";
+import { cellTypes } from "../../game/quantumAssembler/cellTypes";
+import type { CellSelectMode } from "../../app";
 
 /**
  * The properties of the grid cell component.

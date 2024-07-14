@@ -3,9 +3,9 @@
  */
 import { Decimal } from "emath.js";
 import type { ItemInit } from "emath.js";
-import { Game } from "../game";
-import { cellTypes } from "./cellTypes";
-import type { QACellType } from "./cellTypes";
+import { Game } from "./game";
+import { cellTypes } from "./quantumAssembler/cellTypes";
+import type { QACellType } from "./quantumAssembler/cellTypes";
 
 /**
  * The energy items.

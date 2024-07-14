@@ -5,10 +5,10 @@ import "reflect-metadata";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import "./grid/energy";
-import "./grid/quantumAssembler";
+import "./game/energy";
+import "./game/quantumAssembler/quantumAssembler";
 
-import "./data";
+import "./game/data";
 
 import App from "./app";
 

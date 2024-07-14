@@ -2,7 +2,7 @@
  * @file Initializes the game and loads the data
  */
 import { Game } from "./game";
-import { quantumAssembler } from "./grid/quantumAssembler";
+import { quantumAssembler } from "./quantumAssembler/quantumAssembler";
 
 // After all data is set, initialize the game
 Game.init();
