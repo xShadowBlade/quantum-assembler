@@ -1,7 +1,6 @@
 {
     "extends": [
         "eslint:recommended",
-        "prettier",
         "plugin:jsdoc/recommended-typescript",
         "plugin:@typescript-eslint/strict-type-checked",
         "plugin:@typescript-eslint/stylistic-type-checked"
