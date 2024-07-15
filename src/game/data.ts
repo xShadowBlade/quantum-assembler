@@ -2,13 +2,16 @@
  * @file Initializes the game and loads the data
  */
 import { Game } from "./game";
-import { quantumAssembler } from "./quantumAssembler/quantumAssembler";
+import { quantumAssembler, gameDataQASize } from "./quantumAssembler/quantumAssembler";
 
 // After all data is set, initialize the game
 Game.init();
 
 // Load the game data
 Game.dataManager.loadData();
+
+// Resize the quantum assembler grid
+quantumAssembler.resize(gameDataQASize.value.x, gameDataQASize.value.y);
 
 quantumAssembler.reloadGrid();
 

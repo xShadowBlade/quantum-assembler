@@ -5,7 +5,7 @@ import { Grid, Decimal } from "emath.js";
 import type { DecimalSource, GridDirectionCell } from "emath.js";
 
 import { Game } from "../game";
-import { QACell, QACellData, getCellId } from "./qaCell";
+import { QACell, QACellData, getCellId, QACellDataArray } from "./qaCell";
 import { cellTypes } from "./cellTypes";
 import type { QACellType} from "./cellTypes";
 import { energy, instability } from "../energy";
@@ -24,6 +24,12 @@ interface QAGridCell {
 }
 
 /**
+ * The coordinate of a cell in the quantum assembler grid.
+ * Used to identify a cell in the grid.
+ */
+type QACellCoordinate = `${number},${number}`;
+
+/**
  * The quantum assembler grid class contains methods to interact with the quantum assembler grid, such as: setting cells, rotating cells, etc.
  * It contains the grid of the quantum assembler, which is a 7x7 grid of cells {@link QACell}.
  *
@@ -36,22 +42,102 @@ class QuantumAssember {
     public grid: Grid<QAGridCell>;
 
     /**
-     * Initializes a new instance of the QuantumAssember class
+     * The initial size of the quantum assembler grid
      */
-    constructor () {
-        // The size of the quantum assembler grid.
-        const X_SIZE = 7;
-        const Y_SIZE = 7;
+    public static readonly initialXSize = 2;
+
+    /**
+     * The initial size of the quantum assembler grid
+     */
+    public static readonly initialYSize = 2;
+
+    /**
+     * @returns The x size of the quantum assembler grid.
+     */
+    // public xSize = QuantumAssember.initialXSize;
+    public get xSize (): number {
+        return this.grid.xSize;
+    }
+
+    /**
+     * @returns The y size of the quantum assembler grid.
+     */
+    // public ySize = QuantumAssember.initialYSize;
+    public get ySize (): number {
+        return this.grid.ySize;
+    }
+
+    /**
+     * A collection of all cells in the quantum assembler grid.
+     * It is seperated from the grid to allow for easier access to the cells, as well as to check for duplicates when the grid is resized.
+     */
+    // public static readonly qaCells: QACell[] = [];
+
+    // public static readonly qaCellCoordinateSet = new Set<`${number},${number}`>();
+
+    /**
+     * Initializes a new instance of the QuantumAssember class
+     * @param xSize The x-size of the grid
+     * @param ySize The y-size of the grid
+     */
+    constructor (xSize = QuantumAssember.initialXSize, ySize = QuantumAssember.initialYSize) {
+        // Set the size of the grid
+        // this.xSize = xSize;
+        // this.ySize = ySize;
 
         // Init the grid
-        this.grid = new Grid<QAGridCell>(X_SIZE, Y_SIZE, (gridCell) => {
+        this.grid = new Grid<QAGridCell>(xSize, ySize, (gridCell) => {
+            const cellId = getCellId(gridCell.x, gridCell.y);
+
             // Set the cell to void by default
-            Game.dataManager.setData(getCellId(gridCell.x, gridCell.y), new QACellData(gridCell.x, gridCell.y, "void", Decimal.dZero, "up"));
+            // Game.dataManager.setData(getCellId(gridCell.x, gridCell.y), new QACellData(gridCell.x, gridCell.y, "void", Decimal.dZero, "up"));
+
+            // Get the cell data
+            // const data = Game.dataManager.getData(cellId);
+            const data = QACellDataArray.getCell(gridCell.x, gridCell.y);
+
+            // If the data is undefined, create a new instance of QACellData
+            // if (data === undefined) {
+            //     const newData = new QACellData(gridCell.x, gridCell.y, "void", Decimal.dZero, "up");
+            //     // Game.dataManager.setData(cellId, newData);
+            //     QACellDataArray.setCell(gridCell.x, gridCell.y, newData);
+            // }
+
+            // Get the cell static
+            // const cellCoordinates: QACellCoordinate = `${gridCell.x},${gridCell.y}`;
+
+            // if (QuantumAssember.qaCellCoordinateSet.has(cellCoordinates)) {
+
+            // }
 
             return {
                 cell: new QACell(gridCell.x, gridCell.y),
             };
         });
+
+        // Reload the grid
+        this.reloadGrid();
+    }
+
+    /**
+     * Resizes the quantum assembler grid
+     * @param xSize The x-size of the grid
+     * @param ySize The y-size of the grid
+     */
+    public resize (xSize: number, ySize: number): void {
+        // this.xSize = xSize;
+        // this.ySize = ySize;
+
+        this.grid.resize(xSize, ySize);
+
+        // Set the data for the quantum assembler size
+        gameDataQASize.value = {
+            x: xSize,
+            y: ySize,
+        };
+
+        // Reload the grid
+        this.reloadGrid();
     }
 
     /**
@@ -84,7 +170,9 @@ class QuantumAssember {
         tier = new Decimal(tier);
 
         // Set the cell data
-        Game.dataManager.setData(getCellId(x, y), new QACellData(x, y, type, tier, direction));
+        // Game.dataManager.setData(getCellId(x, y), new QACellData(x, y, type, tier, direction));
+
+        QACellDataArray.setCell(x, y, { x, y, type, tier, direction });
 
         // Reload the grid
         this.reloadGrid();
@@ -222,10 +310,11 @@ class QuantumAssember {
     }
 }
 
-// Reload the grid
+// Create the quantum assembler
 const quantumAssembler = new QuantumAssember();
 
-quantumAssembler.reloadGrid();
+// Set the data for the quantum assembler size
+const gameDataQASize = Game.dataManager.setData("quantumAssemblerSize", { x: quantumAssembler.xSize, y: quantumAssembler.ySize });
 
 // Debugging
 if (Game.config.mode === "development") {
@@ -234,5 +323,5 @@ if (Game.config.mode === "development") {
     });
 }
 
-export { QuantumAssember, quantumAssembler };
-export type { QAGridCell, RotateDirection };
+export { QuantumAssember, quantumAssembler, gameDataQASize };
+export type { QAGridCell, RotateDirection, QACellCoordinate };

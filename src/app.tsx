@@ -43,7 +43,7 @@ const App: React.FC = () => {
      */
     function rerender (): void {
         setRender(render + 1);
-    };
+    }
 
     // The selected cell to buy from the shop
     const [selectedShopCell, setSelectedShopCell] = useState<ShopSelectedCell>({
@@ -107,6 +107,14 @@ const App: React.FC = () => {
             >
                 Rerender
             </Button>
+            <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                    if (!window.confirm("Are you sure you want to reset the data?")) return;
+                    Game.dataManager.resetData(true);
+                }}
+            >Reset Data</Button>
             <hr />
             <CellShop
                 rerender={rerender}

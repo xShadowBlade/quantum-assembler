@@ -5,6 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --mode development --output-pathinfo",
     "build": "webpack --mode production",
+    "dev2": "vite dev -d",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts"
   },
@@ -41,15 +42,19 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@swc/core": "^1.6.13",
     "@types/css-modules": "^1.0.4",
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
+    "@vitejs/plugin-react-swc": "^3.7.0",
     "copy-webpack-plugin": "^12.0.1",
     "css-loader": "^7.1.1",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "esbuild": "^0.22.0",
+    "esbuild-decorators": "^1.0.0",
     "esbuild-loader": "^4.0.2",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
@@ -61,8 +66,14 @@
     "mini-css-extract-plugin": "^2.8.0",
     "prettier": "^3.0.3",
     "prettier-eslint": "^16.1.1",
+    "rollup": "^4.18.1",
+    "rollup-plugin-swc": "^0.2.1",
     "style-loader": "^4.0.0",
+    "swc-loader": "^0.2.6",
+    "ts-loader": "^9.5.1",
     "typescript": "^5.5.2",
+    "vite": "^5.3.3",
+    "vite-plugin-html-template": "^1.2.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4"

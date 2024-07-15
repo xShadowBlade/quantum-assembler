@@ -27,6 +27,8 @@ interface GridCellComponentProps {
     selectedCoords: [number, number];
     setSelectedCoords: React.Dispatch<React.SetStateAction<[number, number]>>;
 
+    onClick?: () => void;
+
     theme: Theme;
     cellSelectMode: CellSelectMode;
     cellRotationDirection: RotateDirection;
@@ -106,7 +108,7 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
         <Button
             variant="contained"
             color={color}
-            onClick={() => {
+            onClick={props.onClick ?? (() => {
                 // cell.properties.selected = !cell.properties.selected;
                 // setSelected(cell);
 
@@ -132,7 +134,7 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
                 // rerender();
                 props.rerender();
                 quantumAssembler.reloadGrid();
-            }}
+            })}
             style={{
                 margin: "10px",
                 width: "50px",

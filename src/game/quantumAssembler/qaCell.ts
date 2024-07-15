@@ -5,13 +5,15 @@
  */
 import { Decimal, AttributeStatic } from "emath.js";
 import type { GridCell, GridDirectionCell } from "emath.js";
-import { Expose, Type } from "class-transformer";
+import { Expose, Type, instanceToPlain } from "class-transformer";
 import { Game } from "../game";
 import { cellTypes } from "./cellTypes";
 import type { QACellType, QACellStaticSpawner, QACellEntry } from "./cellTypes";
 
 import { quantumAssembler } from "./quantumAssembler";
-import type { QAGridCell } from "./quantumAssembler";
+import type { QAGridCell, QACellCoordinate } from "./quantumAssembler";
+import { decimalDataToDecimal, decimalToDecimalData } from "../../utils/decimalData";
+import type { DecimalData } from "../../utils/decimalData";
 
 /**
  * The cell ID of a cell in the quantum assembler grid game data
@@ -31,44 +33,209 @@ function getCellId (x: number, y: number): CellId {
 /**
  * The data of a cell in the quantum assembler grid
  */
-class QACellData {
+// class QACellData {
+//     /** The type of the cell */
+//     @Expose()
+//     public type: QACellType;
+
+//     /** The direction of the cell */
+//     @Expose()
+//     public direction: GridDirectionCell;
+
+//     /** The tier of the cell */
+//     @Expose()
+//     @Type(() => Decimal)
+//     public tier: Decimal;
+
+//     /** The x-coordinate of the cell */
+//     @Expose()
+//     public x: number;
+
+//     /** The y-coordinate of the cell */
+//     @Expose()
+//     public y: number;
+
+//     /**
+//      * Initializes a new instance of the QACellData class
+//      * @param x The x-coordinate of the cell
+//      * @param y The y-coordinate of the cell
+//      * @param type The type of the cell
+//      * @param tier The tier of the cell
+//      * @param direction The direction of the cell
+//      */
+//     constructor (x: number, y: number, type: QACellType, tier: Decimal, direction: GridDirectionCell) {
+//         this.type = type;
+//         this.direction = direction;
+//         this.tier = tier;
+//         this.x = x;
+//         this.y = y;
+//     }
+// }
+
+interface QACellGameData {
     /** The type of the cell */
-    @Expose()
-    public type: QACellType;
+    type: QACellType;
 
     /** The direction of the cell */
-    @Expose()
-    public direction: GridDirectionCell;
+    direction: GridDirectionCell;
 
     /** The tier of the cell */
-    @Expose()
-    @Type(() => Decimal)
-    public tier: Decimal;
+    tier: DecimalData;
 
     /** The x-coordinate of the cell */
-    @Expose()
-    public x: number;
+    x: number;
 
     /** The y-coordinate of the cell */
-    @Expose()
-    public y: number;
+    y: number;
+}
+
+/**
+ * Creates a default quantum assembler cell game data
+ * @param x - The x-coordinate of the cell
+ * @param y - The y-coordinate of the cell
+ * @returns The default quantum assembler cell game data
+ */
+const defaultQACellGameDataFactory = (x: number, y: number): QACellGameData => ({
+    type: "void",
+    direction: "up",
+    tier: Decimal.dZero,
+    x,
+    y,
+});
+
+class QACellData implements Readonly<QACellGameData> {
+    // public readonly tier: Decimal;
+    // public readonly type: QACellType;
+    // public readonly direction: GridDirectionCell;
+    // public readonly x: number;
+    // public readonly y: number;
+
+    private gameDataFn: () => QACellGameData;
+    public get gameData (): QACellGameData {
+        return this.gameDataFn();
+    }
+
+    public get tier (): Decimal {
+        return decimalDataToDecimal(this.gameData.tier);
+    }
+    public set tier (value: Decimal) {
+        this.gameData.tier = decimalToDecimalData(value);
+    }
+
+    public get type (): QACellType { return this.gameData.type; }
+    public set type (value: QACellType) { this.gameData.type = value; }
+
+    public get direction (): GridDirectionCell { return this.gameData.direction; }
+    public set direction (value: GridDirectionCell) { this.gameData.direction = value; }
+
+    public get x (): number { return this.gameData.x; }
+    public get y (): number { return this.gameData.y; }
 
     /**
-     * Initializes a new instance of the QACellData class
-     * @param x The x-coordinate of the cell
-     * @param y The y-coordinate of the cell
-     * @param type The type of the cell
-     * @param tier The tier of the cell
-     * @param direction The direction of the cell
+     * Converts the game data to cell data
+     * @param data The game data of the cell
+     * @returns The cell data
      */
-    constructor (x: number, y: number, type: QACellType, tier: Decimal, direction: GridDirectionCell) {
-        this.type = type;
-        this.direction = direction;
-        this.tier = tier;
-        this.x = x;
-        this.y = y;
+    constructor (gameDataFn: () => QACellGameData) {
+        this.gameDataFn = gameDataFn;
+
+        // this.x = x;
+        // this.y = y;
+        // this.type = type;
+        // this.direction = direction;
+
+        // // Handle tier
+        // if (tier instanceof Decimal) {
+        //     this.tier = tier;
+        // } else {
+        //     this.tier = decimalDataToDecimal(tier);
+        // }
+    }
+
+    /**
+     * Converts the cell data to game data
+     * @returns The game data of the cell
+     */
+    public toGameData (): QACellGameData {
+        return instanceToPlain(this) as QACellGameData;
     }
 }
+
+/**
+ * An array of cell data in the quantum assembler grid.
+ * Only used for serialization.
+ */
+class QACellDataArray {
+    /**
+     * Gets the data of a cell in the quantum assembler grid game data
+     * @param x - The x-coordinate of the cell
+     * @param y - The y-coordinate of the cell
+     * @returns The data of the cell
+     */
+    public static getCell (x: number, y: number): QACellData {
+        const coordinateKey: QACellCoordinate = `${x},${y}`;
+
+        // Get the data from the static map
+        const dataFromMap = QACellDataArray.qaCells.get(coordinateKey);
+
+        // If the data exists, return it
+        if (dataFromMap) {
+            return dataFromMap;
+        }
+
+        // Else, get the data from the data manager
+        const dataFromDataManager = (): QACellGameData => { 
+            const data = gameDataQACellData.value.data[coordinateKey];
+            if (data) return data;
+            const defaultData = defaultQACellGameDataFactory(x, y);
+
+            // Set the default data in the data manager
+            gameDataQACellData.value.data[coordinateKey] = defaultData;
+
+            return defaultData;
+        };
+
+        const data = new QACellData(dataFromDataManager);
+        QACellDataArray.qaCells.set(coordinateKey, data);
+        return data;
+    }
+
+    /**
+     * Sets the data of a cell in the quantum assembler grid game data
+     * @param x - The x-coordinate of the cell
+     * @param y - The y-coordinate of the cell
+     * @param data - The data of the cell
+     */
+    public static setCell (x: number, y: number, data: QACellGameData): void {
+        // Set the data in the static map
+        // QACellDataArray.qaCells.set(`${x},${y}`, data);
+
+        // Set the data in the data manager
+        gameDataQACellData.value.data[`${x},${y}`] = data;
+    }
+
+    /**
+     * The map of cell data in the quantum assembler grid.
+     * If the data is found in the map, it must be from the data manager.
+     * If the data is not found in the map, it is fetched from the data manager.
+     */
+    public static qaCells = new Map<QACellCoordinate, QACellData>();
+
+    /**
+     * The data of the cells in the quantum assembler grid.
+     */
+    @Expose()
+    // @Type(() => QACellData)
+    // public data: QACellData[] = [];
+    // public data = new Map<QACellCoordinate, QACellData | undefined>();
+    public data: Record<QACellCoordinate, QACellGameData | undefined> = {};
+
+    // get data (): Record<QACellCoordinate, QACellGameData | undefined> {
+    //     return Object.fromEntries(QACellDataArray.qaCells.entries());
+    // }
+}
+
+const gameDataQACellData = Game.dataManager.setData("quantumAssemblerGrid", new QACellDataArray());
 
 /**
  * A cell class in the quantum assembler grid.
@@ -86,28 +253,26 @@ class QACell {
     /** The y-coordinate of the cell */
     public readonly y: number;
 
+    private dataFn: () => QACellData = () => QACellDataArray.getCell(this.x, this.y);
+
     /**
      * @returns The data of the cell
      */
     private get data (): QACellData {
         // Get the data from the data manager
-        const data = Game.dataManager.getData(getCellId(this.x, this.y));
-
-        // If the data is undefined, create a new instance of QACellData
-        if (data === undefined) {
-            const newData = new QACellData(this.x, this.y, "void", Decimal.dZero, "up");
-            Game.dataManager.setData(getCellId(this.x, this.y), newData);
-            return newData;
-        }
+        // const data = Game.dataManager.getData(getCellId(this.x, this.y));
+        // const data = gameDataQACellData.value.data[`${this.x},${this.y}`];
+        const data = QACellDataArray.getCell(this.x, this.y);
 
         // Return the data
         if (data instanceof QACellData) {
             return data;
         } else {
             // This should never happen
-            console.error("Cell data is not an instance of QACellData", data);
-            console.log(data);
-            return new QACellData(this.x, this.y, "void", Decimal.dZero, "up");
+            // console.error("Cell data is not an instance of QACellData", data);
+            // console.log(data);
+            // return new QACellData(this.x, this.y, "void", Decimal.dZero, "up");
+            throw new Error("Cell data is not an instance of QACellData");
         }
     }
 
@@ -233,5 +398,5 @@ if (Game.config.mode === "development") {
     });
 }
 
-export { QACell, QACellData, getCellId };
+export { QACell, QACellData, QACellDataArray, getCellId, gameDataQACellData };
 export type { CellId };

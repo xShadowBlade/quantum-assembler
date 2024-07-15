@@ -36,7 +36,7 @@ module.exports = (env, argv) => {
         },
         module: {
             rules: [
-            // Use esbuild to compile JavaScript & TypeScript
+                // Use esbuild to compile JavaScript & TypeScript
                 {
                 // Match `.js`, `.jsx`, `.ts` or `.tsx` files
                     test: /\.[jt]sx?$/,
@@ -48,6 +48,16 @@ module.exports = (env, argv) => {
                         tsconfig: "./tsconfig.json",
                     },
                 },
+
+                // Use swc-loader to compile JavaScript & TypeScript because it has support for decorators
+                // {
+                //     test: /\.[jt]sx?$/,
+                //     exclude: /node_modules/,
+                //     use: {
+                //         loader: "swc-loader",
+                //     },
+                // },
+
                 {
                     // If you enable `experiments.css` or `experiments.futureDefaults`, please uncomment line below
                     // type: "javascript/auto",
