@@ -1,16 +1,18 @@
 /**
  * @file Declares the energy display component
  */
-import React, { useState } from "react";
-import { Button } from "@mui/material";
-import { Decimal } from "emath.js";
-import { energy, instability } from "../game/energy";
+import React from "react";
+import { useGameState } from "../gameStateContext";
+// import { Button } from "@mui/material";
+// import { Decimal } from "emath.js";
+// import { energy, instability } from "../game/energy";
 
 const EnergyDisplay: React.FC = () => {
+    const gameState = useGameState();
+    const { energy, instability } = gameState;
+
     const energyValue = energy.value;
     const instabilityValue = instability.value;
-
-    // TODO: Fix attribute not resetting
 
     const energyGain = energyValue.formatGain(energy.boost.calculate());
     const instabilityGain = instabilityValue.formatGain(instability.boost.calculate());

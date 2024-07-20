@@ -8,6 +8,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 
+import { useGameState } from "../../gameStateContext";
+
 /**
  * The mode of selecting a cell.
  * - `"select"`: Select a cell
@@ -18,27 +20,21 @@ import Radio from "@mui/material/Radio";
 type CellSelectMode = "select" | "place" | "remove" | "rotate";
 
 /**
- * The properties of the cell select mode component
- */
-interface CellSelectModeProps {
-    cellSelectMode: CellSelectMode;
-    setCellSelectMode: React.Dispatch<React.SetStateAction<CellSelectMode>>;
-}
-
-/**
- * The cell select mode component
- * @param props The properties of the cell select mode component
  * @returns The cell select mode component
  */
-const CellSelectModeComponent: React.FC<CellSelectModeProps> = (props) => {
+const CellSelectModeComponent: React.FC = () => {
+    const gameState = useGameState();
+
     return (
         <FormControl component="fieldset">
             <FormLabel component="legend">Cell Select Mode</FormLabel>
             <RadioGroup
                 aria-label="cell-select-mode"
                 name="cell-select-mode"
-                value={props.cellSelectMode}
-                onChange={(event) => { props.setCellSelectMode(event.target.value as CellSelectMode); }}
+                value={gameState.cellSelectMode}
+                onChange={(event) => {
+                    gameState.set("cellSelectMode", event.target.value as CellSelectMode);
+                }}
             >
                 <FormControlLabel value="select" control={<Radio />} label="Select" />
                 <FormControlLabel value="place" control={<Radio />} label="Place" />

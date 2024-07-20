@@ -6,32 +6,23 @@ import type { ButtonOwnProps } from "@mui/material/Button";
 import Button from "@mui/material/Button";
 import GridComponent from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import { Grid, GridCell, GridCellCollection, GridDirectionCell } from "emath.js";
+import type { GridCell, GridDirectionCell } from "emath.js";
 
 import { quantumAssembler } from "../../game/quantumAssembler/quantumAssembler";
-import type { QAGridCell, RotateDirection } from "../../game/quantumAssembler/quantumAssembler";
+import type { QAGridCell } from "../../game/quantumAssembler/quantumAssembler";
 import { createCellThemeKey } from "../../game/quantumAssembler/cellTypeColors";
 import type { CellColorOverrideKey } from "../../game/quantumAssembler/cellTypeColors";
 
-import type { Theme } from "@mui/material/styles";
 import { cellTypes } from "../../game/quantumAssembler/cellTypes";
-import type { CellSelectMode } from "../../app";
+
+import { useGameState } from "../../gameStateContext";
 
 /**
  * The properties of the grid cell component.
  */
 interface GridCellComponentProps {
     cell: GridCell<QAGridCell>;
-    render: number;
-    rerender: () => void;
-    selectedCoords: [number, number];
-    setSelectedCoords: React.Dispatch<React.SetStateAction<[number, number]>>;
-
     onClick?: () => void;
-
-    theme: Theme;
-    cellSelectMode: CellSelectMode;
-    cellRotationDirection: RotateDirection;
 }
 
 const directions: Record<GridDirectionCell, string> = {
@@ -41,8 +32,17 @@ const directions: Record<GridDirectionCell, string> = {
     right: "→",
 };
 
+// TODO: Refactor this
+/**
+ * @returns The grid cell component.
+ * @param props - The properties of the grid cell component.
+ */
 const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
-    const { cell, setSelectedCoords, theme } = props;
+    const { cell } = props;
+
+    const gameState = useGameState();
+
+    const { theme, selectedCoords } = gameState;
 
     const [color, setColor] = useState<ButtonOwnProps["color"]>(createCellThemeKey("void"));
 
@@ -53,12 +53,12 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
         const borderColor = theme.palette[getColor()];
 
         // If the cell is selected, make the border color darker
-        const isSelected = cell.x === props.selectedCoords[0] && cell.y === props.selectedCoords[1];
+        const isSelected = cell.x === selectedCoords[0] && cell.y === selectedCoords[1];
 
         // return isSelected ? borderColor.dark : borderColor.main;
 
         if (isSelected) {
-            console.log("Selected", cell.x, cell.y, props.selectedCoords, borderColor.dark, { borderColor });
+            console.log("Selected", cell.x, cell.y, selectedCoords, borderColor.dark, { borderColor });
             return borderColor.dark;
             // return "primary";
         } else {
@@ -68,62 +68,39 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
     };
 
     // TODO: Better way to set the style
-    const [style, setStyle] = useState<React.CSSProperties>({
-        // borderRadius: 0,
-        // border: 5,
-        // borderColor: getBorderColor(),
-        // get borderColor () {
-        //     // console.log("Getting border color", cell.x, cell.y);
-        //     return getBorderColor();
-        // },
-    });
+    // const [style, setStyle] = useState<React.CSSProperties>({
+    //     // borderRadius: 0,
+    //     // border: 5,
+    //     // borderColor: getBorderColor(),
+    //     // get borderColor () {
+    //     //     // console.log("Getting border color", cell.x, cell.y);
+    //     //     return getBorderColor();
+    //     // },
+    // });
 
     // On render, set the color
     useEffect(() => {
+        // TODO: fix rerenders
         // console.log("Setting color", cell.x, cell.y, getColor());
         setColor(getColor());
-
-        // setStyle({
-        //     borderRadius: 0,
-        //     border: 5,
-        //     borderColor: getBorderColor(),
-        // });
-    }, [props.render]);
+    }, []);
 
     return (
-    // <Box
-    //     // style={{
-    //     //     border: "5px solid",
-    //     //     borderColor: getBorderColor(),
-    //     //     width: "50px",
-    //     //     height: "50px",
-    //     //     margin: "10px",
-    //     // }}
-    //     height={50}
-    //     width={50}
-    //     border={5}
-    //     borderColor={getBorderColor()}
-    //     margin={1}
-    // >
         <Button
             variant="contained"
             color={color}
             onClick={props.onClick ?? (() => {
-                // cell.properties.selected = !cell.properties.selected;
-                // setSelected(cell);
 
-                // Set the selected coordinates
-                // setSelectedCoords([cell.x, cell.y]);
-
-                switch (props.cellSelectMode) {
+                switch (gameState.cellSelectMode) {
                     case "select":
-                        setSelectedCoords([cell.x, cell.y]);
+                        // setSelectedCoords([cell.x, cell.y]);
+                        gameState.set("selectedCoords", [cell.x, cell.y]);
                         break;
                     // case "place":
                     //     quantumAssembler.setCell(cell.x, cell.y, "basic", 1, "up");
                     //     break;
                     case "rotate":
-                        quantumAssembler.rotateCell(cell.x, cell.y, props.cellRotationDirection);
+                        quantumAssembler.rotateCell(cell.x, cell.y, gameState.cellRotationDirection);
                         break;
                     case "remove":
                         quantumAssembler.setCell(cell.x, cell.y);
@@ -132,18 +109,16 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
 
                 // Reload the grid
                 // rerender();
-                props.rerender();
+                // props.rerender();
+                gameState.rerender();
                 quantumAssembler.reloadGrid();
             })}
             style={{
                 margin: "10px",
                 width: "50px",
                 height: "50px",
-                // borderRadius: "0",
-                // border: "5px solid",
-                // borderColor: getBorderColor(),
             }}
-            sx={style}
+            // sx={style}
         >
             {cell.properties.cell.cellType.character} {directions[cell.properties.cell.direction]}
         </Button>
@@ -151,13 +126,10 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
     );
 };
 
-type GridCellProps = Omit<GridCellComponentProps, "cell">
-
 /**
  * @returns The grid component.
- * @param props - The properties of the grid component.
  */
-const GridVisuals: React.FC<GridCellProps> = (props) => {
+const GridVisuals: React.FC = () => {
 
     // The selected cell
     // const [selected, setSelected] = useState<GridCell<QAGridCell> | null>(null);
@@ -173,17 +145,6 @@ const GridVisuals: React.FC<GridCellProps> = (props) => {
                         <GridCellComponent
                             key={cellIndex}
                             cell={cell}
-                            render={props.render}
-                            rerender={props.rerender}
-                            selectedCoords={props.selectedCoords}
-                            setSelectedCoords={props.setSelectedCoords}
-                            theme={props.theme}
-                            cellSelectMode={props.cellSelectMode}
-                            cellRotationDirection={props.cellRotationDirection}
-                            // props={{
-                            //     cell,
-                            //     ...props,
-                            // }}
                         />
                     ))}
                 </GridComponent>
