@@ -260,8 +260,6 @@ class QACell {
      */
     private get data (): QACellData {
         // Get the data from the data manager
-        // const data = Game.dataManager.getData(getCellId(this.x, this.y));
-        // const data = gameDataQACellData.value.data[`${this.x},${this.y}`];
         const data = QACellDataArray.getCell(this.x, this.y);
 
         // Return the data
@@ -269,9 +267,6 @@ class QACell {
             return data;
         } else {
             // This should never happen
-            // console.error("Cell data is not an instance of QACellData", data);
-            // console.log(data);
-            // return new QACellData(this.x, this.y, "void", Decimal.dZero, "up");
             throw new Error("Cell data is not an instance of QACellData");
         }
     }
@@ -317,13 +312,13 @@ class QACell {
      * The energy energy generation of the cell.
      * It is an attribute so it can be affected by boosts such as up quarks.
      */
-    public readonly generation: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
+    public readonly generation = new AttributeStatic(undefined, true, Decimal.dZero);
 
     /**
      * The instability generation of the cell.
      * It is an attribute so it can be affected by boosts such as down quarks.
      */
-    public readonly instability: AttributeStatic = new AttributeStatic(undefined, true, Decimal.dZero);
+    public readonly instability = new AttributeStatic(undefined, true, Decimal.dZero);
 
     /**
      * Initializes a new instance of the QACell class
@@ -388,6 +383,9 @@ class QACell {
         (this.cellType as QACellStaticSpawner).effect?.(this.tier, this, quantumAssembler.grid);
     }
 }
+
+// For each cell type, create a "phantom" cell for displaying in the shop
+// const phantomCells = cellTypes.map((cellType) => new QACell(0, 0));
 
 // Debugging
 if (Game.config.mode === "development") {

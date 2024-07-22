@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import type { ButtonOwnProps } from "@mui/material/Button";
 import Button from "@mui/material/Button";
 import GridComponent from "@mui/material/Grid";
-import Box from "@mui/material/Box";
+// import Box from "@mui/material/Box";
 import type { GridCell, GridDirectionCell } from "emath.js";
 
 import { quantumAssembler } from "../../game/quantumAssembler/quantumAssembler";
@@ -14,16 +14,9 @@ import { createCellThemeKey } from "../../game/quantumAssembler/cellTypeColors";
 import type { CellColorOverrideKey } from "../../game/quantumAssembler/cellTypeColors";
 
 import { cellTypes } from "../../game/quantumAssembler/cellTypes";
+import type { QACell } from "../../game/quantumAssembler/qaCell";
 
 import { useGameState } from "../../gameStateContext";
-
-/**
- * The properties of the grid cell component.
- */
-interface GridCellComponentProps {
-    cell: GridCell<QAGridCell>;
-    onClick?: () => void;
-}
 
 const directions: Record<GridDirectionCell, string> = {
     up: "↑",
@@ -31,6 +24,14 @@ const directions: Record<GridDirectionCell, string> = {
     left: "←",
     right: "→",
 };
+
+/**
+ * The properties of the grid cell component.
+ */
+interface GridCellComponentProps {
+    cell: QACell;
+    onClick?: () => void;
+}
 
 // TODO: Refactor this
 /**
@@ -46,7 +47,7 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
 
     const [color, setColor] = useState<ButtonOwnProps["color"]>(createCellThemeKey("void"));
 
-    const getColor = (shade?: false): CellColorOverrideKey => createCellThemeKey(cell.properties.cell.cellType.type);
+    const getColor = (shade?: false): CellColorOverrideKey => createCellThemeKey(cell.cellType.type);
 
     // TODO: Fix this
     const getBorderColor = (): string => {
@@ -87,13 +88,13 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
 
     return (
         <Button
+            className="m-2 w-14 h-14"
             variant="contained"
             color={color}
             onClick={props.onClick ?? (() => {
 
                 switch (gameState.cellSelectMode) {
                     case "select":
-                        // setSelectedCoords([cell.x, cell.y]);
                         gameState.set("selectedCoords", [cell.x, cell.y]);
                         break;
                     // case "place":
@@ -108,19 +109,11 @@ const GridCellComponent: React.FC<GridCellComponentProps> = (props) => {
                 }
 
                 // Reload the grid
-                // rerender();
-                // props.rerender();
                 gameState.rerender();
                 quantumAssembler.reloadGrid();
             })}
-            style={{
-                margin: "10px",
-                width: "50px",
-                height: "50px",
-            }}
-            // sx={style}
         >
-            {cell.properties.cell.cellType.character} {directions[cell.properties.cell.direction]}
+            {cell.cellType.character} {directions[cell.direction]}
         </Button>
     // </Box>
     );
@@ -144,7 +137,7 @@ const GridVisuals: React.FC = () => {
                     {row.map((cell, cellIndex) => (
                         <GridCellComponent
                             key={cellIndex}
-                            cell={cell}
+                            cell={cell.properties.cell}
                         />
                     ))}
                 </GridComponent>
@@ -154,17 +147,18 @@ const GridVisuals: React.FC = () => {
         <hr />
 
         {/* List of all buttons (debug) */}
-        <h4>Buttons</h4>
+        {/* <h4>Buttons</h4>
         {cellTypes.map((cellType) => (
             <Button
                 key={cellType.type}
                 variant="contained"
                 color={createCellThemeKey(cellType.type)}
-                style={{
-                    margin: "10px",
-                    width: "50px",
-                    height: "50px",
-                }}
+                // style={{
+                //     margin: "10px",
+                //     width: "50px",
+                //     height: "50px",
+                // }}
+                className="m-5 w-12 h-12"
                 // onClick={() => {
                 //     console.log("Selected", cellType.type);
                 //     props.setSelectedCellType(cellType.type);
@@ -172,7 +166,7 @@ const GridVisuals: React.FC = () => {
             >
                 {cellType.character}
             </Button>
-        ))}
+        ))} */}
 
         <hr />
     </>);

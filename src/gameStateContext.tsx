@@ -8,7 +8,9 @@ import type { GridDirectionCell } from "emath.js";
 
 // Color theme
 import { cellTheme } from "./game/quantumAssembler/cellTypeColors";
-import { ThemeProvider } from "@mui/material/styles";
+
+// Providers
+import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles";
 // import type { Theme } from "@mui/material/styles";
 
 import type { QACellType } from "./game/quantumAssembler/cellTypes";
@@ -16,6 +18,10 @@ import type { RotateDirection } from "./game/quantumAssembler/quantumAssembler";
 
 // Currency displays
 import { energy, instability } from "./game/energy";
+
+// Grid cell
+import { quantumAssembler } from "./game/quantumAssembler/quantumAssembler";
+import type { QACell } from "./game/quantumAssembler/qaCell";
 
 /**
  * Removes all read-only keys from an object type.
@@ -106,6 +112,8 @@ interface GameState {
      */
     selectedCoords: [number, number];
 
+    getSelectedCell: (this: GameState) => QACell;
+
     // Currency displays
     energy: typeof energy;
     instability: typeof instability;
@@ -118,9 +126,11 @@ interface GameState {
 const GameStateContext = createContext<GameState>();
 
 const GameStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [render, setRender] = useState(0);
+
     // Set the initial game state using the useState hook so that it can be updated
     const [gameState, setGameState] = useState<GameState>({
-        set: (key, value) => {
+        set (key, value) {
             setGameState((prev) => ({
                 ...prev,
                 [key]: value,
@@ -130,11 +140,12 @@ const GameStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         theme: cellTheme,
 
         render: 0,
-        rerender: () => {
-            setGameState((prev) => ({
-                ...prev,
-                render: prev.render + 1,
-            }));
+        rerender () {
+            // setGameState((prev) => ({
+            //     ...prev,
+            //     render: prev.render + 1,
+            // }));
+            setRender((prev) => prev + 1);
         },
 
         selectedShopCell: {
@@ -145,6 +156,15 @@ const GameStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         cellSelectMode: "select",
         cellRotationDirection: "cw",
         selectedCoords: [0, 0],
+        getSelectedCell () {
+            // const gameStateInternal = this;
+
+            // console.log("getSelectedCell", this);
+
+            // Get the selected cell
+            const [x, y] = this.selectedCoords;
+            return quantumAssembler.getCell(x, y);
+        },
 
         energy,
         instability,
@@ -152,14 +172,21 @@ const GameStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     // Return the game state context provider as well as the theme provider
     return (
-        <ThemeProvider theme={cellTheme}>
-            <GameStateContext.Provider value={gameState}>
-                {children}
-            </GameStateContext.Provider>
-        </ThemeProvider>
+        // StyledEngineProvider is required for use with tailwindcss
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={cellTheme}>
+                <GameStateContext.Provider value={gameState}>
+                    {children}
+                </GameStateContext.Provider>
+            </ThemeProvider>
+        </StyledEngineProvider>
     );
 };
 
+/**
+ * Uses the game state context
+ * @returns The game state
+ */
 const useGameState = (): GameState => useContext(GameStateContext);
 
 export { GameStateProvider, useGameState };

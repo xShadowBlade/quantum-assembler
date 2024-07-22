@@ -5,22 +5,21 @@ import React, { useEffect } from "react";
 
 import Button from "@mui/material/Button";
 
-import { Decimal } from "emath.js";
-import type { GridDirectionCell } from "emath.js";
+// import { Decimal } from "emath.js";
+// import type { GridDirectionCell } from "emath.js";
 
-import type { QACellType } from "./game/quantumAssembler/cellTypes";
+// import type { QACellType } from "./game/quantumAssembler/cellTypes";
 
 import GridVisuals from "./components/grid/grid";
 import CellShop from "./components/shop";
 import EnergyDisplay from "./components/energyDisplay";
 import CellSelectModeComponent from "./components/grid/cellSelectMode";
+import DebugDevelopment from "./components/debugDevelopment";
 
-// Color theme
 import { Game } from "./game/game";
 
 // State provider
 import { GameStateProvider } from "./gameStateContext";
-import DebugDevelopment from "./components/debugDevelopment";
 
 /**
  * The main app component. Also contains global / shared state and functions.
@@ -46,7 +45,16 @@ const App: React.FC = () => {
             // alignItems: "center",
             // justifyContent: "center",
         }}>
-            <h1>Quantum Assembler</h1>
+            <h1 className="text-4xl font-bold text-blue-950">
+                Quantum Assembler
+            </h1>
+            {/* <h1>Quantum Assembler</h1> */}
+
+            {/* test */}
+            {/* <p className="text-red-500">
+                red text
+            </p> */}
+
             <EnergyDisplay />
             <GridVisuals />
 

@@ -31,8 +31,8 @@ energy.boost.setBoost({
     order: 0,
 });
 
-energy.boost.setBoost({
-    id: "instability",
+instability.boost.setBoost({
+    id: "initial",
     value: () => Decimal.dZero,
     order: 0,
 });

@@ -1,6 +1,7 @@
 /**
  * @file Declares the cell type colors using material ui
  */
+import { Game } from "../game";
 import { cellTypes } from "./cellTypes";
 import type { QACellType } from "./cellTypes";
 
@@ -90,33 +91,15 @@ declare module "@mui/material/Button" {
     interface ButtonPropsColorOverrides extends ButtonPropsColorOverridesType {}
 }
 
-// test
-// type ButtonProps = import("@mui/material/Button/Button").ButtonOwnProps;
-
-// type ButtonPropsColor = ButtonProps["color"];
-
-// type ButtonPropsColorCollapsed = {
-//     [key in Exclude<ButtonPropsColor, undefined>]: ButtonPropsColor;
-// } extends infer R ?
-//     keyof R
-//     : never;
-
 // debug
-Object.assign(window, {
-    cellTheme,
-    cellThemeOptionsPalette,
-    createCellTheme,
-});
-
-// void (async () => {
-//     if ((await import("../game.js")).Game.config.mode === "development") {
-//         Object.assign(window, {
-//             cellTheme,
-//             cellThemeOptionsPalette,
-//             createCellTheme,
-//         });
-//     }
-// })();
+if (Game.config.mode === "development") {
+    Object.assign(window, {
+        cellTheme,
+        cellThemeOptionsPalette,
+        createCellTheme,
+        createCellThemeKey,
+    });
+}
 
 export { cellTheme, cellThemeOptionsPalette, createCellTheme, createCellThemeKey };
 export type { CellColorOverrideKey, ButtonPropsColorOverridesType };

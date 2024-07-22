@@ -7,15 +7,14 @@ import { Game as GameClass } from "emath.js/game";
  * Represents the game
  */
 const Game = new GameClass({
-    // mode: ((): "development" | "production" => {
-    //     try {
-    //         // @ts-expect-error - MODE is replaced by webpack, as type: "development" | "production"
-    //         return MODE as "development" | "production";
-    //     } catch {
-    //         return "development";
-    //     }
-    // })(),
-    mode: "development",
+    mode: ((): "development" | "production" => {
+        try {
+            // @ts-expect-error - MODE is replaced by webpack, as type: "development" | "production"
+            return MODE as "development" | "production";
+        } catch {
+            return "development";
+        }
+    })(),
     name: {
         id: "quantum-assembler",
         title: "Quantum Assembler",
@@ -26,6 +25,8 @@ const Game = new GameClass({
 });
 
 if (Game.config.mode === "development") {
+    console.log("Development mode");
+
     // Load the eMath library for debugging purposes
     void (async (): Promise<void> => {
         const keysToLoad = {
